@@ -1,0 +1,13 @@
+// 导航栏
+body {
+    padding-top: 50px;
+}
+
+#nav {
+    .navbar-header .navbar-brand:hover,
+    .navbar-collapse .navbar-nav > li > a:hover,
+    .navbar-collapse .navbar-nav > li.active > a {
+        color: #555;
+        background-color: #e7e7e7;
+    }
+}

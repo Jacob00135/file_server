@@ -1,0 +1,12 @@
+body {
+  padding-top: 50px;
+}
+
+#nav .navbar-header .navbar-brand:hover,
+#nav .navbar-collapse .navbar-nav > li > a:hover,
+#nav .navbar-collapse .navbar-nav > li.active > a {
+  color: #555;
+  background-color: #e7e7e7;
+}
+
+/*# sourceMappingURL=base.css.map */
