@@ -10,12 +10,7 @@ form[name="login"] {
 
     input {
         @include small-lg-height();
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-        transition: none;
-
-        &:hover {
-            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-        }
+        @include clear-input-transition();
     }
 
     #submit-btn {

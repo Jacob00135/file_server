@@ -13,6 +13,10 @@ DATABASE_DIR: str = os.path.join(BASE_DIR, 'database_sqlite')
 login_manager: LoginManager = LoginManager()
 login_manager.login_view = 'identity.login'
 db: SQLAlchemy = SQLAlchemy()
+IDENTITY_ACCESS: dict = {
+    'anonymous': 1,
+    'administrator': 7
+}
 
 
 class Config(object):
@@ -66,7 +70,7 @@ def create_app(config_name: str) -> Flask:
     db.init_app(app)
 
     # 初始化数据库
-    # 建表
+    # 建表：customers
     con: Connection = sqlite3.connect(config_class.DATABASE_PATH)
     cursor: Cursor = con.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS customers (
@@ -80,8 +84,15 @@ def create_app(config_name: str) -> Flask:
     if result[0] <= 0:
         cursor.execute('INSERT INTO customers(customer_name, password_hash) VALUES("admin", "{}");'.format(generate_password_hash('123456')))
         con.commit()
-        cursor.close()
-        con.close()
+    # 建表：directory
+    cursor.execute("""CREATE TABLE IF NOT EXISTS directory (
+        dir_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+        dir_path TEXT    NOT NULL UNIQUE,
+        access   INTEGER NOT NULL
+    );""")
+    con.commit()
+    cursor.close()
+    con.close()
 
     # 注册蓝图
     from blueprints.main import main as main_blueprint

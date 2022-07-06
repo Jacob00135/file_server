@@ -1,7 +1,9 @@
 import os.path
+from typing import Union
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import current_user, login_user, logout_user
-from models import Customer
+from config import db
+from models import Customer, Directory
 
 identity: Blueprint = Blueprint('identity', __name__)
 
@@ -45,20 +47,22 @@ def logout():
 def visible_dir():
     if not current_user.is_authenticated:
         abort(403)
-    return render_template('identity/visible_dir.html', dir_list=[
-        'F:\\GameCG',
-        'E:\\GameCG\\Video',
-        'G:\\workspace\\jpasmr',
-        'G:\\L4D2_MAP',
-        r'G:\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server'
-    ])
+    return render_template('identity/visible_dir.html', dir_list=Directory.query.all())
 
 
 @identity.route('/add_dir', methods=['POST'])
 def add_dir():
     if not current_user.is_authenticated:
         abort(403)
-    dir_path = request.form.get('dir_path', '', type=str)
-    if not os.path.exists(dir_path):
+    dir_path: str = request.form.get('dir_path', '', type=str).lower()
+    access: int = request.form.get('access', 0, type=int)
+    if access not in [1, 2, 4]:
+        return {'status': 0, 'message': '访问权限只能是[1, 2, 4]其中一个！'}
+    if ('/' not in dir_path and '\\' not in dir_path) or not os.path.exists(dir_path):
         return {'status': 0, 'message': '路径不存在！'}
+    if Directory.query.filter_by(dir_path=dir_path).first() is not None:
+        return {'status': 0, 'message': '该目录已经被添加过！'}
+    dir_object: Directory = Directory(dir_path=dir_path, access=access)
+    db.session.add(dir_object)
+    db.session.commit()
     return {'status': 1}

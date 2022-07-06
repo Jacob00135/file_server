@@ -1,7 +1,7 @@
 import os.path
 import unittest
 from werkzeug.test import TestResponse
-from flask import current_app, url_for
+from flask import current_app
 from config import BASE_DIR, create_app, db
 from models import Customer
 
@@ -59,9 +59,31 @@ class ConfigTestCase(BaseTestCase):
         self.assertFalse(current_app is None)
         self.assertTrue(current_app.config['TESTING'])
         self.assertTrue(os.path.exists(current_app.config['DATABASE_PATH']))
+        table_name_list: list = [t.name for t in db.get_tables_for_bind()]
+        self.assertTrue(len(table_name_list) == 2)
+        self.assertTrue('customers' in table_name_list)
+        self.assertTrue('directory' in table_name_list)
         cus: Customer = Customer.query.filter_by(customer_name='admin').first()
         self.assertTrue(cus is not None)
         self.assertTrue(cus.verify_password('123456'))
+
+
+class CustomerTestCase(BaseTestCase):
+
+    def test_password_hash(self):
+        """测试自动生成password_hash"""
+        cus = Customer(customer_name='xiaoming', password='123456')
+        with self.assertRaises(AttributeError):
+            print(cus.password)
+        self.assertTrue(cus.password_hash is not None)
+
+    def test_verify_password(self):
+        """测试verify_password函数"""
+        cus = Customer(customer_name='xiaoming', password='123456')
+        db.session.add(cus)
+        db.session.commit()
+        self.assertTrue(cus.verify_password('123456'))
+        self.assertFalse(cus.verify_password('098765'))
 
 
 if __name__ == '__main__':

@@ -17,9 +17,16 @@
                 </div>
                 <div class="modal-body">
                     <form name="add-dir" action="{{ url_for('identity.add_dir') }}" method="post">
-                        <div class="form-group">
+                        <div class="form-group dir-path-group">
                             <input type="text" name="dir_path" class="form-control input-lg" placeholder="路径"
                                    required autocomplete="off" />
+                        </div>
+                        <div class="form-group">
+                            <label for="role-name">谁可以查看</label>
+                            <select class="form-control" name="access">
+                                <option value="1" selected="selected">游客</option>
+                                <option value="4">仅管理员</option>
+                            </select>
                         </div>
                         <button id="add-dir-btn" type="submit" class="btn btn-primary btn-block btn-lg">添加</button>
                         <div id="add-dir-warning" class="alert alert-danger hidden" role="alert"></div>
@@ -44,8 +51,13 @@
             <button type="button" class="btn btn-primary">删除</button>
         </div>
         <ul id="dir_list" class="list-group">
-            {% for dir_path in dir_list %}
-                <li class="list-group-item">{{ dir_path }}</li>
+            {% for dir_object in dir_list %}
+                <li class="list-group-item">
+                    {% if dir_object.admin_level() %}
+                        <span class="glyphicon glyphicon-user"></span>
+                    {% endif %}
+                    {{ dir_object.dir_path }}
+                </li>
             {% endfor %}
         </ul>
     </div>

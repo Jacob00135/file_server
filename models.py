@@ -1,5 +1,5 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import db, login_manager
+from config import db, login_manager, IDENTITY_ACCESS
 
 
 class Customer(db.Model):
@@ -36,6 +36,22 @@ class Customer(db.Model):
 
     def __repr__(self) -> str:
         return '<Customer "">'.format(self.customer_name)
+
+
+class Directory(db.Model):
+    __tablename__: str = 'directory'
+    dir_id: int = db.Column(db.Integer, primary_key=True)
+    dir_path: str = db.Column(db.Text, nullable=False, unique=True)
+    access: int = db.Column(db.Integer, nullable=False)
+
+    def can(self, perm) -> bool:
+        return (self.access & perm) == perm
+
+    def admin_level(self) -> bool:
+        return not self.can(IDENTITY_ACCESS['anonymous'])
+
+    def __repr__(self) -> str:
+        return '<Directory "">'.format(self.dir_path)
 
 
 @login_manager.user_loader

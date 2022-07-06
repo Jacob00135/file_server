@@ -1,18 +1,21 @@
 @import "../../_mixin.scss";
 
 // 添加路径模态框
-#add_dir {
-    form[name="add-dir"] {
-        input,
-        #add-dir-btn {
-            @include small-lg-height();
-        }
+#add_dir form[name="add-dir"] {
 
-        #add-dir-warning {
-            @include small-lg-height();
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
+    input[name="dir_path"] {
+        @include small-lg-height();
+        @include clear-input-transition();
+    }
+
+    #add-dir-warning {
+        @include small-lg-height();
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    #add-dir-btn {
+        @include small-lg-height();
     }
 }
 
@@ -33,7 +36,7 @@
 
 // 目录路径列表
 #dir_list {
-    & > li {
+    & > li.list-group-item {
         @include text-ellipsis();
 
         &:hover {
