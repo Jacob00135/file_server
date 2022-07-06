@@ -37,6 +37,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_authenticated %}
                         <li><a href="{{ url_for('identity.manage') }}">管理</a></li>
+                        <li><a href="{{ url_for('identity.logout') }}">登出</a></li>
                     {% else %}
                         <li><a href="{{ url_for('identity.login') }}">登录</a></li>
                     {% endif %}
