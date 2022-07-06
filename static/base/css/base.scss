@@ -6,7 +6,8 @@ body {
 #nav {
     .navbar-header .navbar-brand:hover,
     .navbar-collapse .navbar-nav > li > a:hover,
-    .navbar-collapse .navbar-nav > li.active > a {
+    .navbar-collapse .navbar-nav > li.active > a,
+    .navbar-collapse .navbar-nav > li.dropdown > .dropdown-menu > li > a:hover {
         color: #555;
         background-color: #e7e7e7;
     }

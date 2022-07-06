@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}可见目录{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='identity/css/visible_dir.css') }}" />
+{% endblock %}
+{% block content %}
+
+    <!-- 模态框 [start] -->
+    <div class="modal fade" id="add_dir" tabindex="-1" role="dialog" aria-labelledby="add-dir">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">添加目录</h4>
+                </div>
+                <div class="modal-body">
+                    <form name="add-dir" action="{{ url_for('identity.add_dir') }}" method="post">
+                        <div class="form-group">
+                            <input type="text" name="dir_path" class="form-control input-lg" placeholder="路径"
+                                   required autocomplete="off" />
+                        </div>
+                        <button id="add-dir-btn" type="submit" class="btn btn-primary btn-block btn-lg">添加</button>
+                        <div id="add-dir-warning" class="alert alert-danger hidden" role="alert"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 模态框 [end] -->
+
+    <!-- 页面主体 [start] -->
+    <div id="visible_dir" class="container">
+        <h1>编辑可见目录</h1>
+        {% for message in get_flashed_messages() %}
+            {{ message }}
+        {% endfor %}
+        <div id="action">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_dir">添加</button>
+            <button type="button" class="btn btn-primary">删除</button>
+        </div>
+        <ul id="dir_list" class="list-group">
+            {% for dir_path in dir_list %}
+                <li class="list-group-item">{{ dir_path }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- 页面主体 [end] -->
+{% endblock %}
+{% block javascript %}
+    <script type="text/javascript" src="{{ url_for('static', filename='identity/js/visible_dir.js') }}"></script>
+{% endblock %}

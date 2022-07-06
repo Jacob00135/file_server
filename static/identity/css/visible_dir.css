@@ -1,0 +1,44 @@
+@charset "UTF-8";
+#add_dir form[name=add-dir] input,
+#add_dir form[name=add-dir] #add-dir-btn {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+#add_dir form[name=add-dir] #add-dir-warning {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#visible_dir h1 {
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-size: 26px;
+  text-align: center;
+}
+
+#action {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+#action button:first-child {
+  margin-right: 20px;
+}
+
+#dir_list > li {
+  white-space: nowrap;
+  /* 强制文本一行内显示，默认是normal自动换行 */
+  overflow: hidden;
+  /* 隐藏溢出部分 */
+  text-overflow: ellipsis;
+  /* 用省略号替代超出的部分 */
+}
+#dir_list > li:hover {
+  background-color: #F8F8F8;
+}
+
+/*# sourceMappingURL=visible_dir.css.map */

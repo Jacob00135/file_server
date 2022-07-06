@@ -1,27 +1,39 @@
 @mixin gray-bgc {
+    // 灰色背景
     color: #555;
     background-color: #e7e7e7;
 }
 
 @mixin h1-title {
+    // 重设h1标签样式
     margin-top: 30px;
     margin-bottom: 20px;
     font-size: 26px;
+    text-align: center;
 }
 
 @mixin block-center {
+    // 块级元素居中
     margin-left: auto;
     margin-right: auto;
 }
 
 @mixin small-lg-height {
+    // 重设输入框、按钮高度
     height: 40px;
     padding-top: 7px;
     padding-bottom: 7px;
 }
 
 @mixin warning-box-size {
+    // 警告框大小
     margin-top: 10px;
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+@mixin text-ellipsis {
+    white-space: nowrap; /* 强制文本一行内显示，默认是normal自动换行 */
+    overflow: hidden; /* 隐藏溢出部分 */
+    text-overflow: ellipsis; /* 用省略号替代超出的部分 */
 }

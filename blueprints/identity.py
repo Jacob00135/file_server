@@ -1,5 +1,6 @@
+import os.path
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
-from flask_login import login_required, current_user, login_user, logout_user
+from flask_login import current_user, login_user, logout_user
 from models import Customer
 
 identity: Blueprint = Blueprint('identity', __name__)
@@ -40,8 +41,24 @@ def logout():
     return redirect(url_for('main.index'))
 
 
-@identity.route('/manage')
-def manage():
+@identity.route('/visible_dir')
+def visible_dir():
     if not current_user.is_authenticated:
         abort(403)
-    return '管理页面'
+    return render_template('identity/visible_dir.html', dir_list=[
+        'F:\\GameCG',
+        'E:\\GameCG\\Video',
+        'G:\\workspace\\jpasmr',
+        'G:\\L4D2_MAP',
+        r'G:\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server\learn_flask\file_server'
+    ])
+
+
+@identity.route('/add_dir', methods=['POST'])
+def add_dir():
+    if not current_user.is_authenticated:
+        abort(403)
+    dir_path = request.form.get('dir_path', '', type=str)
+    if not os.path.exists(dir_path):
+        return {'status': 0, 'message': '路径不存在！'}
+    return {'status': 1}

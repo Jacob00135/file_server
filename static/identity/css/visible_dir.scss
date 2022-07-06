@@ -1,0 +1,43 @@
+@import "../../_mixin.scss";
+
+// 添加路径模态框
+#add_dir {
+    form[name="add-dir"] {
+        input,
+        #add-dir-btn {
+            @include small-lg-height();
+        }
+
+        #add-dir-warning {
+            @include small-lg-height();
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    }
+}
+
+#visible_dir h1 {
+    @include h1-title();
+}
+
+// 操作按钮组
+#action {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+
+    button:first-child {
+        margin-right: 20px;
+    }
+}
+
+// 目录路径列表
+#dir_list {
+    & > li {
+        @include text-ellipsis();
+
+        &:hover {
+            background-color: #F8F8F8;
+        }
+    }
+}
