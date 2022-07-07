@@ -1,5 +1,5 @@
 .idea/*
-__pycache__/*
+*/__pycache__/*
 venv/*
 database_sqlite/db.sqlite
 database_sqlite/db_test.sqlite
