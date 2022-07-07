@@ -9,6 +9,10 @@
 #add_dir form[name=add-dir] input[name=dir_path]:hover {
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
 }
+#add_dir form[name=add-dir] input[name=dir_path]:focus {
+  -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
 #add_dir form[name=add-dir] #add-dir-warning {
   height: 40px;
   padding-top: 7px;

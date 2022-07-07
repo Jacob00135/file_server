@@ -9,7 +9,7 @@
     const decideDeleteBtn = document.querySelector('#decide-delete-btn');
 
     // ajax代替发送添加路径的表单
-    ajaxSubmitForm('form[name="add-dir"]', function (data) {
+    ajaxSubmitForm('add-dir', undefined, function (data) {
         if (data.status === 0) {
             const warning = document.querySelector('#add-dir-warning');
             warning.innerHTML = data.message;

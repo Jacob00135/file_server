@@ -2,12 +2,58 @@ body {
   padding-top: 50px;
 }
 
-#nav .navbar-header .navbar-brand:hover,
-#nav .navbar-collapse .navbar-nav > li > a:hover,
-#nav .navbar-collapse .navbar-nav > li.active > a,
-#nav .navbar-collapse .navbar-nav > li.dropdown > .dropdown-menu > li > a:hover {
+#nav .navbar-header .navbar-brand:hover {
   color: #555;
   background-color: #e7e7e7;
+}
+#nav .navbar-collapse .navbar-nav > li a {
+  padding-left: 25px;
+}
+#nav .navbar-collapse .navbar-nav > li a:hover, #nav .navbar-collapse .navbar-nav > li.active a {
+  color: #555;
+  background-color: #e7e7e7;
+}
+#nav #update-password {
+  display: block;
+  width: 100%;
+  border-width: 0;
+  background-color: transparent;
+  padding: 5px 15px 5px 25px;
+  color: #777;
+  line-height: 20px;
+  text-align: left;
+}
+#nav #update-password:hover {
+  color: #555;
+  background-color: #E7E7E7;
+}
+#nav #update-password:active {
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+
+form[name=update-password] input {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  transition: none;
+}
+form[name=update-password] input:hover {
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+form[name=update-password] input:focus {
+  -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+form[name=update-password] button {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+form[name=update-password] #update-password-warning {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 /*# sourceMappingURL=base.css.map */

@@ -1,14 +1,44 @@
+@import "../../_mixin.scss";
+
 // 导航栏
 body {
     padding-top: 50px;
 }
 
 #nav {
-    .navbar-header .navbar-brand:hover,
-    .navbar-collapse .navbar-nav > li > a:hover,
-    .navbar-collapse .navbar-nav > li.active > a,
-    .navbar-collapse .navbar-nav > li.dropdown > .dropdown-menu > li > a:hover {
-        color: #555;
-        background-color: #e7e7e7;
+    .navbar-header .navbar-brand:hover {
+        @include gray-bgc();
+    }
+
+    .navbar-collapse .navbar-nav > li {
+        a {
+            padding-left: 25px;
+        }
+
+        a:hover,
+        &.active a {
+            @include gray-bgc();
+        }
+    }
+
+    #update-password {
+        @include like-a-button();
+    }
+}
+
+// 修改密码表单
+form[name="update-password"] {
+    input {
+        @include small-lg-height();
+        @include clear-input-transition();
+    }
+
+    button {
+        @include small-lg-height();
+    }
+
+    #update-password-warning {
+        margin-top: 10px;
+        margin-bottom: 10px;
     }
 }
