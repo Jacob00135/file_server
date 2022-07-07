@@ -11,6 +11,7 @@ class BaseTestCase(unittest.TestCase):
     identity_bp: dict = {
         'login': '/identity/login',
         'logout': '/identity/logout',
+        'update_password': '/identity/update_password',
         'visible_dir': '/identity/visible_dir',
         'add_dir': '/identity/add_dir',
         'delete_dir': '/identity/delete_dir'

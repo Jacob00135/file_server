@@ -1,7 +1,7 @@
 import json
 from werkzeug.test import TestResponse
 from start import BaseTestCase
-from models import Directory
+from models import Customer, Directory
 from config import db
 
 
@@ -49,6 +49,43 @@ class LoginTestCase(BaseTestCase):
         self.login('admin', '123456')
         self.logout()
         self.assertFalse(self.is_logged())
+
+
+class UpdatePasswordTestCase(BaseTestCase):
+    def test_update_password_1(self):
+        """未登录用户请求修改密码：403"""
+        response: TestResponse = self.client.post(self.identity_bp['update_password'], data={'password': '123456'})
+        self.assertTrue(response.status_code == 403)
+
+    def test_update_password_2(self):
+        """修改密码请求：密码位数不在[6, 20]"""
+        self.login('admin', '123456')
+        response: TestResponse = self.client.post(self.identity_bp['update_password'], data={'password': '12'})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '密码长度不能少于6位，不能大于20位！')
+
+        data: dict = {'password': '123456789012345678901234567890'}
+        response: TestResponse = self.client.post(self.identity_bp['update_password'], data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '密码长度不能少于6位，不能大于20位！')
+
+    def test_update_password_3(self):
+        """修改密码请求：新旧密码一样"""
+        self.login('admin', '123456')
+        response: TestResponse = self.client.post(self.identity_bp['update_password'], data={'password': '123456'})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '新密码不能与旧密码相同！')
+
+    def test_update_password_4(self):
+        """修改密码请求：修改成功"""
+        self.login('admin', '123456')
+        response: TestResponse = self.client.post(self.identity_bp['update_password'], data={'password': '654321'})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 1)
+        self.assertTrue(Customer.query.filter_by(customer_name='admin').first().verify_password('654321'))
 
 
 class AddDirTestCase(BaseTestCase):
