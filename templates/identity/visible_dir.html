@@ -1,11 +1,16 @@
 {% extends "base.html" %}
+{% import "macro.html" as component %}
 {% block title %}可见目录{% endblock %}
 {% block link %}
     <link rel="stylesheet" href="{{ url_for('static', filename='identity/css/visible_dir.css') }}" />
 {% endblock %}
 {% block content %}
 
-    <!-- 模态框 [start] -->
+    <!-- 警告模态框 [start] -->
+    {{ component.warning_modal() }}
+    <!-- 警告模态框 [end] -->
+
+    <!-- 添加路径模态框 [start] -->
     <div class="modal fade" id="add_dir" tabindex="-1" role="dialog" aria-labelledby="add-dir">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -38,28 +43,47 @@
             </div>
         </div>
     </div>
-    <!-- 模态框 [end] -->
+    <!-- 添加路径模态框 [end] -->
 
     <!-- 页面主体 [start] -->
     <div id="visible_dir" class="container">
         <h1>编辑可见目录</h1>
-        {% for message in get_flashed_messages() %}
-            {{ message }}
-        {% endfor %}
+
+        <!-- 操作按钮组 [start] -->
         <div id="action">
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_dir">添加</button>
-            <button type="button" class="btn btn-primary">删除</button>
+            <button id="delete-dir-btn" type="button" class="btn btn-danger">删除</button>
+            <button id="decide-delete-btn" type="button" class="btn btn-danger hidden">确定删除</button>
         </div>
-        <ul id="dir_list" class="list-group">
+        <!-- 操作按钮组 [end] -->
+
+        <!-- 全选、反选 [start] -->
+        <ul id="all-invert-group" class="list-group hidden">
+            <li class="list-group-item">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" />
+                        <span class="text">全选</span>
+                    </label>
+                </div>
+                <button type="button" class="btn btn-default invert-btn">反选</button>
+            </li>
+        </ul>
+        <!-- 全选、反选 [end] -->
+
+        <!-- 目录路径列表 [start] -->
+        <ul id="dir_list" class="list-group" data-action="{{ url_for('identity.delete_dir') }}">
             {% for dir_object in dir_list %}
                 <li class="list-group-item">
-                    {% if dir_object.admin_level() %}
-                        <span class="glyphicon glyphicon-user"></span>
-                    {% endif %}
-                    {{ dir_object.dir_path }}
+{#                    {% if dir_object.admin_level() %}#}
+{#                        <span class="glyphicon glyphicon-user"></span>#}
+{#                    {% endif %}#}
+                    <input type="checkbox" value="{{ dir_object.dir_path }}" />
+                    <span class="text">{{ dir_object.dir_path }}</span>
                 </li>
             {% endfor %}
         </ul>
+        <!-- 目录路径列表 [end] -->
     </div>
     <!-- 页面主体 [end] -->
 {% endblock %}

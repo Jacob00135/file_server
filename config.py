@@ -18,6 +18,9 @@ IDENTITY_ACCESS: dict = {
     'administrator': 7
 }
 
+if not os.path.exists(DATABASE_DIR):
+    os.mkdir(DATABASE_DIR)
+
 
 class Config(object):
     HOST: str = '0.0.0.0'

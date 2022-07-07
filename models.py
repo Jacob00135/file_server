@@ -45,10 +45,10 @@ class Directory(db.Model):
     access: int = db.Column(db.Integer, nullable=False)
 
     def can(self, perm) -> bool:
-        return (self.access & perm) == perm
+        return (self.access & perm) == self.access
 
     def admin_level(self) -> bool:
-        return not self.can(IDENTITY_ACCESS['anonymous'])
+        return len(bin(IDENTITY_ACCESS['administrator']).replace('0b', '')) == len(bin(self.access).replace('0b', ''))
 
     def __repr__(self) -> str:
         return '<Directory "">'.format(self.dir_path)

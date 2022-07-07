@@ -1,11 +1,22 @@
 import os.path
-from typing import Union
+import json
+from json.decoder import JSONDecodeError
+from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import current_user, login_user, logout_user
 from config import db
 from models import Customer, Directory
 
 identity: Blueprint = Blueprint('identity', __name__)
+
+
+def anonymous_forbidden(f):
+    @wraps(f)
+    def func(*args, **kwargs):
+        if not current_user.is_authenticated:
+            abort(403)
+        return f(*args, **kwargs)
+    return func
 
 
 @identity.route('/login', methods=['GET', 'POST'])
@@ -44,25 +55,39 @@ def logout():
 
 
 @identity.route('/visible_dir')
+@anonymous_forbidden
 def visible_dir():
-    if not current_user.is_authenticated:
-        abort(403)
     return render_template('identity/visible_dir.html', dir_list=Directory.query.all())
 
 
 @identity.route('/add_dir', methods=['POST'])
+@anonymous_forbidden
 def add_dir():
-    if not current_user.is_authenticated:
-        abort(403)
-    dir_path: str = request.form.get('dir_path', '', type=str).lower()
+    dir_path: str = request.form.get('dir_path', '', type=str).lower().replace('/', '\\')
     access: int = request.form.get('access', 0, type=int)
     if access not in [1, 2, 4]:
         return {'status': 0, 'message': '访问权限只能是[1, 2, 4]其中一个！'}
-    if ('/' not in dir_path and '\\' not in dir_path) or not os.path.exists(dir_path):
+    if '\\' not in dir_path or not os.path.exists(dir_path):
         return {'status': 0, 'message': '路径不存在！'}
     if Directory.query.filter_by(dir_path=dir_path).first() is not None:
         return {'status': 0, 'message': '该目录已经被添加过！'}
     dir_object: Directory = Directory(dir_path=dir_path, access=access)
     db.session.add(dir_object)
+    db.session.commit()
+    return {'status': 1}
+
+
+@identity.route('/delete_dir', methods=['POST'])
+@anonymous_forbidden
+def delete_dir():
+    dir_path_list: str = request.form.get('dir_path_list', '', type=str)
+    try:
+        dir_path_list: list = json.loads(dir_path_list)
+    except JSONDecodeError:
+        return {'status': 0, 'message': '请求数据不合法！'}
+    for dir_path in dir_path_list:
+        dir_object = Directory.query.filter_by(dir_path=dir_path).first()
+        if dir_object is not None:
+            db.session.delete(dir_object)
     db.session.commit()
     return {'status': 1}

@@ -3,14 +3,17 @@ import unittest
 from werkzeug.test import TestResponse
 from flask import current_app
 from config import BASE_DIR, create_app, db
-from models import Customer
+from models import Customer, Directory
+from config import IDENTITY_ACCESS
 
 
 class BaseTestCase(unittest.TestCase):
     identity_bp: dict = {
         'login': '/identity/login',
         'logout': '/identity/logout',
-        'visible_dir': '/identity/visible_dir'
+        'visible_dir': '/identity/visible_dir',
+        'add_dir': '/identity/add_dir',
+        'delete_dir': '/identity/delete_dir'
     }
     main_bp: dict = {
         'index': '/'
@@ -84,6 +87,31 @@ class CustomerTestCase(BaseTestCase):
         db.session.commit()
         self.assertTrue(cus.verify_password('123456'))
         self.assertFalse(cus.verify_password('098765'))
+
+
+class DirectoryTestCase(BaseTestCase):
+
+    def test_can(self):
+        """Directory模型的can方法"""
+        dir_1: Directory = Directory(dir_path='C:\\Users', access=1)
+        dir_2: Directory = Directory(dir_path='C:\\', access=4)
+        db.session.add(dir_1)
+        db.session.add(dir_2)
+        db.session.commit()
+        self.assertTrue(dir_1.can(IDENTITY_ACCESS['anonymous']))
+        self.assertTrue(dir_1.can(IDENTITY_ACCESS['administrator']))
+        self.assertFalse(dir_2.can(IDENTITY_ACCESS['anonymous']))
+        self.assertTrue(dir_2.can(IDENTITY_ACCESS['administrator']))
+
+    def test_admin_level(self):
+        """Directory模型的admin_level方法"""
+        dir_1: Directory = Directory(dir_path='C:\\Users', access=1)
+        dir_2: Directory = Directory(dir_path='C:\\', access=4)
+        db.session.add(dir_1)
+        db.session.add(dir_2)
+        db.session.commit()
+        self.assertFalse(dir_1.admin_level())
+        self.assertTrue(dir_2.admin_level())
 
 
 if __name__ == '__main__':

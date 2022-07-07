@@ -34,8 +34,43 @@
   justify-content: center;
   margin-bottom: 20px;
 }
-#action button:first-child {
-  margin-right: 20px;
+#action button:nth-child(n+2) {
+  margin-left: 20px;
+}
+
+#all-invert-group {
+  margin-bottom: -1px;
+}
+#all-invert-group > li.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  height: 42px;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background-color: #E8E8E8;
+}
+#all-invert-group > li.list-group-item .checkbox {
+  height: 20px;
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+#all-invert-group > li.list-group-item .checkbox label {
+  display: flex;
+}
+#all-invert-group > li.list-group-item .checkbox input[type=checkbox] {
+  margin-top: 3px;
+  margin-right: 4px;
+}
+#all-invert-group > li.list-group-item .checkbox .text {
+  height: 20px;
+  line-height: 20px;
+}
+#all-invert-group > li.list-group-item .invert-btn {
+  height: 32px;
+  margin-top: 4px;
+  padding: 3px 12px;
 }
 
 #dir_list > li.list-group-item {
@@ -45,9 +80,37 @@
   /* 隐藏溢出部分 */
   text-overflow: ellipsis;
   /* 用省略号替代超出的部分 */
+  display: flex;
+  height: 42px;
+  color: #2B79A2;
 }
 #dir_list > li.list-group-item:hover {
   background-color: #F8F8F8;
+}
+#dir_list > li.list-group-item input[type=checkbox] {
+  display: none;
+}
+#dir_list > li.list-group-item .text {
+  height: 100%;
+  line-height: 20px;
+}
+
+#dir_list.select-status > li.list-group-item:first-child {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+#dir_list.select-status > li.list-group-item:hover {
+  background-color: #F8F8F8;
+  cursor: pointer;
+}
+#dir_list.select-status > li.list-group-item.selected {
+  background-color: #ff9493;
+  color: #fff;
+}
+#dir_list.select-status > li.list-group-item input[type=checkbox] {
+  display: inline-block;
+  margin-top: 2px;
+  margin-right: 4px;
 }
 
 /*# sourceMappingURL=visible_dir.css.map */

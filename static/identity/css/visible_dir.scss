@@ -29,18 +29,98 @@
     justify-content: center;
     margin-bottom: 20px;
 
-    button:first-child {
-        margin-right: 20px;
+    button:nth-child(n + 2) {
+        margin-left: 20px;
     }
 }
 
-// 目录路径列表
+// 全选、反选
+#all-invert-group {
+    margin-bottom: -1px;
+
+    & > li.list-group-item {
+        display: flex;
+        justify-content: space-between;
+        height: 42px;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        background-color: #E8E8E8;
+
+        .checkbox {
+            height: 20px;
+            margin-top: 10px;
+            margin-bottom: 0;
+
+            label {
+                display: flex;
+            }
+
+            input[type="checkbox"] {
+                margin-top: 3px;
+                margin-right: 4px;
+            }
+
+            .text {
+                height: 20px;
+                line-height: 20px;
+            }
+        }
+
+        .invert-btn {
+            height: 32px;
+            margin-top: 4px;
+            padding: 3px 12px;
+        }
+    }
+}
+
+// 目录路径列表：通常状态
 #dir_list {
     & > li.list-group-item {
         @include text-ellipsis();
+        display: flex;
+        height: 42px;
+        color: #2B79A2;
 
         &:hover {
             background-color: #F8F8F8;
+        }
+
+        input[type="checkbox"] {
+            display: none;
+        }
+
+        .text {
+            height: 100%;
+            line-height: 20px;
+        }
+    }
+}
+
+// 目录路径列表：选择删除状态
+#dir_list.select-status {
+    & > li.list-group-item {
+        &:first-child {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        &:hover {
+            background-color: #F8F8F8;
+            cursor: pointer;
+        }
+
+        &.selected {
+            background-color: #ff9493;
+            color: #fff;
+        }
+
+        input[type="checkbox"] {
+            display: inline-block;
+            margin-top: 2px;
+            margin-right: 4px;
         }
     }
 }
