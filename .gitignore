@@ -3,6 +3,5 @@ __pycache__/*
 */__pycache__/*
 venv/*
 tests/*
-database_sqlite/db.sqlite
-database_sqlite/db_test.sqlite
+database_sqlite/*
 开发文档.md
