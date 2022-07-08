@@ -52,8 +52,10 @@
         <!-- 操作按钮组 [start] -->
         <div id="action">
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_dir">添加</button>
-            <button id="delete-dir-btn" type="button" class="btn btn-danger">删除</button>
+            <button id="decide-update-btn" type="button" class="btn btn-primary hidden">确定更改</button>
+            <button id="update-access-btn" type="button" class="btn btn-primary">更改权限</button>
             <button id="decide-delete-btn" type="button" class="btn btn-danger hidden">确定删除</button>
+            <button id="delete-dir-btn" type="button" class="btn btn-danger">删除</button>
         </div>
         <!-- 操作按钮组 [end] -->
 
@@ -72,14 +74,26 @@
         <!-- 全选、反选 [end] -->
 
         <!-- 目录路径列表 [start] -->
-        <ul id="dir_list" class="list-group" data-action="{{ url_for('identity.delete_dir') }}">
+        <ul id="dir_list" class="list-group" data-delete-action="{{ url_for('identity.delete_dir') }}" data-update-access-action="{{ url_for('identity.update_access') }}">
             {% for dir_object in dir_list %}
-                <li class="list-group-item">
-{#                    {% if dir_object.admin_level() %}#}
-{#                        <span class="glyphicon glyphicon-user"></span>#}
-{#                    {% endif %}#}
+                <li class="list-group-item" data-source-access="{{ dir_object.access }}" data-access="{{ dir_object.access }}">
                     <input type="checkbox" value="{{ dir_object.dir_path }}" />
                     <span class="text">{{ dir_object.dir_path }}</span>
+                    {% if dir_object.admin_level() %}
+                        <span class="glyphicon glyphicon-user"></span>
+                    {% else %}
+                        <span class="glyphicon glyphicon-user hidden"></span>
+                    {% endif %}
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="update-access-dropdown-{{ loop.index }}"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            <span class="glyphicon glyphicon-option-vertical"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="update-access-dropdown-{{ loop.index }}">
+                            <li><button type="button" class="btn btn-default anonymous" data-access="1" data-index="{{ loop.index - 1 }}">游客可见</button></li>
+                            <li><button type="button" class="btn btn-default administrator" data-access="4" data-index="{{ loop.index - 1 }}">仅管理员可见</button></li>
+                        </ul>
+                    </div>
                 </li>
             {% endfor %}
         </ul>

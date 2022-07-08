@@ -14,7 +14,8 @@ class BaseTestCase(unittest.TestCase):
         'update_password': '/identity/update_password',
         'visible_dir': '/identity/visible_dir',
         'add_dir': '/identity/add_dir',
-        'delete_dir': '/identity/delete_dir'
+        'delete_dir': '/identity/delete_dir',
+        'update_access': '/identity/update_access'
     }
     main_bp: dict = {
         'index': '/'
@@ -55,6 +56,13 @@ class BaseTestCase(unittest.TestCase):
         self.assertTrue(len(response.history) == 1)
         self.assertTrue(response.history[0].status_code == 302)
         self.assertTrue(response.history[0].headers.get('Location') == location)
+
+    def insert_test_directory_item(self) -> None:
+        self.dir_path_list: list = ['c:\\', 'd:\\', 'e:\\', 'f:\\', 'g:\\']
+        for dir_path in self.dir_path_list:
+            dir_object: Directory = Directory(dir_path=dir_path, access=1)
+            db.session.add(dir_object)
+        db.session.commit()
 
 
 class ConfigTestCase(BaseTestCase):

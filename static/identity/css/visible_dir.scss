@@ -76,11 +76,12 @@
     }
 }
 
-// 目录路径列表：通常状态
+// 目录路径列表：一般状态
 #dir_list {
     & > li.list-group-item {
         @include text-ellipsis();
         display: flex;
+        justify-content: space-between;
         height: 42px;
         color: #2B79A2;
 
@@ -93,8 +94,22 @@
         }
 
         .text {
+            flex: 1;
             height: 100%;
             line-height: 20px;
+        }
+
+        .glyphicon.glyphicon-user {
+            width: 14px;
+
+            &::before {
+                position: absolute;
+                top: 3px;
+            }
+        }
+
+        .dropdown {
+            display: none;
         }
     }
 }
@@ -121,6 +136,40 @@
             display: inline-block;
             margin-top: 2px;
             margin-right: 4px;
+        }
+    }
+}
+
+// 目录路径列表：更改权限状态
+#dir_list.update-status {
+    & > li.list-group-item {
+        overflow: visible;
+        padding-right: 20px;
+
+        .dropdown {
+            display: block;
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 40px;
+
+            & > button {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                border-width: 0;
+                border-radius: 0;
+            }
+
+            .dropdown-menu {
+                left: auto;
+                right: 0;
+
+                & > li > button {
+                    @include like-dropdown-a-button();
+                }
+            }
         }
     }
 }

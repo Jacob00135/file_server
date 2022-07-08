@@ -11,10 +11,6 @@ body {
     }
 
     .navbar-collapse .navbar-nav > li {
-        a {
-            padding-left: 25px;
-        }
-
         a:hover,
         &.active a {
             @include gray-bgc();

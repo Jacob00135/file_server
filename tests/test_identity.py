@@ -146,11 +146,7 @@ class DeleteDirTestCase(BaseTestCase):
 
     def setUp(self) -> None:
         super(DeleteDirTestCase, self).setUp()
-        self.dir_path_list: list = ['c:\\', 'd:\\', 'e:\\', 'f:\\', 'g:\\']
-        for dir_path in self.dir_path_list:
-            dir_object: Directory = Directory(dir_path=dir_path, access=1)
-            db.session.add(dir_object)
-        db.session.commit()
+        self.insert_test_directory_item()
 
     def test_delete_dir_1(self):
         """未登录用户请求删除目录：403"""
@@ -187,3 +183,86 @@ class DeleteDirTestCase(BaseTestCase):
         self.assertTrue(response.status_code == 200)
         self.assertTrue(response.json['status'] == 1)
         self.assertTrue(len(Directory.query.all()) == 0)
+
+
+class UpdateAccessTestCase(BaseTestCase):
+
+    def setUp(self) -> None:
+        super(UpdateAccessTestCase, self).setUp()
+        self.insert_test_directory_item()
+
+    def test_update_access_1(self):
+        """未登录用户请求更改权限：403"""
+        data: dict = {'update_item': json.dumps([{'dir_path': 'c:\\', 'access': 1}])}
+        response: TestResponse = self.client.post(self.identity_bp['update_access'], data=data)
+        self.assertTrue(response.status_code == 403)
+
+    def test_update_access_2(self):
+        """更改权限请求：json解析失败"""
+        self.login('admin', '123456')
+        data: dict = {'update_item': 'printf'}
+        response: TestResponse = self.client.post(self.identity_bp['update_access'], data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '请求数据不合法！')
+
+    def test_update_access_3(self):
+        """更改权限请求：成功"""
+        self.login('admin', '123456')
+        update_item: list = [
+            {'dir_path': 'c:\\', 'access': 4},
+            {'dir_path': 'd:\\', 'access': 4},
+            {'dir_path': 'e:\\', 'access': 4}
+        ]
+        data: dict = {'update_item': json.dumps(update_item)}
+        response: TestResponse = self.client.post(self.identity_bp['update_access'], data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 1)
+        for item in update_item:
+            dir_object: Directory = Directory.query.filter_by(dir_path=item['dir_path']).first()
+            self.assertTrue(dir_object is not None)
+            self.assertTrue(dir_object.access == item['access'])
+
+    def test_update_access_4(self):
+        """更改权限请求：条目中不包含必须的键"""
+        self.login('admin', '123456')
+        data: dict = {'update_item': json.dumps([
+            {'dir_path': 'c:\\', 'access': 4},
+            {'access': 4},
+            {'dir_path': 'e:\\'}
+        ])}
+        response: TestResponse = self.client.post(self.identity_bp['update_access'], data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 1)
+        for dir_path in self.dir_path_list:
+            dir_object: Directory = Directory.query.filter_by(dir_path=dir_path).first()
+            if dir_path == 'c:\\':
+                self.assertTrue(dir_object.access == 4)
+            else:
+                self.assertTrue(dir_object.access == 1)
+
+    def test_update_access_5(self):
+        """更改权限请求：路径的值没有添加过"""
+        self.login('admin', '123456')
+        data: dict = {'update_item': json.dumps([
+            {'dir_path': 'c:\\users', 'access': 4}
+        ])}
+        response: TestResponse = self.client.post(self.identity_bp['update_access'], data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 1)
+        for dir_path in self.dir_path_list:
+            self.assertTrue(Directory.query.filter_by(dir_path=dir_path).first().access == 1)
+
+    def test_update_access_6(self):
+        """更改权限请求：权限值不合法"""
+        self.login('admin', '123456')
+        data: dict = {'update_item': json.dumps([
+            {'dir_path': 'c:\\', 'access': 3},
+            {'dir_path': 'd:\\', 'access': 5},
+            {'dir_path': 'e:\\', 'access': 0}
+        ])}
+        response: TestResponse = self.client.post(self.identity_bp['update_access'], data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 1)
+        for dir_path in self.dir_path_list:
+            self.assertTrue(Directory.query.filter_by(dir_path=dir_path).first().access == 1)

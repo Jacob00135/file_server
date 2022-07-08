@@ -108,3 +108,22 @@ def update_password():
     db.session.add(current_user)
     db.session.commit()
     return {'status': 1}
+
+
+@identity.route('/update_access', methods=['POST'])
+@anonymous_forbidden
+def update_access():
+    update_item: str = request.form.get('update_item', '', type=str)
+    try:
+        update_item: list = json.loads(update_item)
+    except JSONDecodeError:
+        return {'status': 0, 'message': '请求数据不合法！'}
+    for item in update_item:
+        dir_path: str = item.get('dir_path', '')
+        access: int = item.get('access', 0)
+        dir_object = Directory.query.filter_by(dir_path=dir_path).first()
+        if dir_object is not None and access in [1, 2, 4]:
+            dir_object.access = access
+            db.session.add(dir_object)
+    db.session.commit()
+    return {'status': 1}

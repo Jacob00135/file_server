@@ -6,9 +6,6 @@ body {
   color: #555;
   background-color: #e7e7e7;
 }
-#nav .navbar-collapse .navbar-nav > li a {
-  padding-left: 25px;
-}
 #nav .navbar-collapse .navbar-nav > li a:hover, #nav .navbar-collapse .navbar-nav > li.active a {
   color: #555;
   background-color: #e7e7e7;
@@ -17,9 +14,10 @@ body {
   display: block;
   width: 100%;
   border-width: 0;
+  border-radius: 0;
   background-color: transparent;
-  padding: 5px 15px 5px 25px;
-  color: #777;
+  padding: 3px 20px;
+  color: #333;
   line-height: 20px;
   text-align: left;
 }
@@ -30,6 +28,12 @@ body {
 #nav #update-password:active {
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+@media (max-width: 767px) {
+  #nav #update-password {
+    padding-left: 25px;
+    color: #777;
+  }
 }
 
 form[name=update-password] input {
