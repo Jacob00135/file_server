@@ -1,7 +1,8 @@
-import os.path
+import os
 from flask import Blueprint, render_template, abort, request
 from flask_login import current_user
 from models import Directory
+from utils import FileItem
 
 main: Blueprint = Blueprint('main', __name__)
 
@@ -35,8 +36,21 @@ def index():
 
 @main.route('/<dir_path>')
 def visit_visible_dir(dir_path):
-    print(os.path.join(dir_path, request.args.get('path', '', type=str)))
+    # 检查权限
     visible_dir: Directory = Directory.query.filter_by(dir_path=dir_path).first_or_404()
     if visible_dir.admin_level() and not current_user.is_authenticated:
         abort(403)
-    return render_template('main/index.html', visible_dir=visible_dir)
+
+    # 检查路径
+    full_path: str = os.path.abspath(os.path.join(dir_path, request.args.get('path', '', type=str)))
+    if not os.path.isdir(full_path) or os.path.exists(full_path):
+        abort(404)
+
+    # 获取所有直属子目录和直属文件
+    file_item_list: list = []
+    for f in os.listdir(full_path):
+        try:
+            file_item_list.append(FileItem(f))
+        except OSError:
+            continue
+    return render_template('main/index.html', file_item_list=file_item_list)
