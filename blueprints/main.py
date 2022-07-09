@@ -1,4 +1,7 @@
-from flask import Blueprint, render_template
+import os.path
+from flask import Blueprint, render_template, abort, request
+from flask_login import current_user
+from models import Directory
 
 main: Blueprint = Blueprint('main', __name__)
 
@@ -23,4 +26,17 @@ def internal_server_error(e):
 
 @main.route('/')
 def index():
-    return render_template('main/index.html')
+    if current_user.is_authenticated:
+        dir_list: list = Directory.query.all()
+    else:
+        dir_list: list = Directory.query.filter_by(access=1).all()
+    return render_template('main/index.html', dir_list=dir_list)
+
+
+@main.route('/<dir_path>')
+def visit_visible_dir(dir_path):
+    print(os.path.join(dir_path, request.args.get('path', '', type=str)))
+    visible_dir: Directory = Directory.query.filter_by(dir_path=dir_path).first_or_404()
+    if visible_dir.admin_level() and not current_user.is_authenticated:
+        abort(403)
+    return render_template('main/index.html', visible_dir=visible_dir)
