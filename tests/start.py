@@ -18,7 +18,8 @@ class BaseTestCase(unittest.TestCase):
         'update_access': '/identity/update_access'
     }
     main_bp: dict = {
-        'index': '/'
+        'index': '/',
+        'visit_visible_dir': '/{}'
     }
 
     def setUp(self) -> None:

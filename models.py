@@ -35,7 +35,7 @@ class Customer(db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self) -> str:
-        return '<Customer "">'.format(self.customer_name)
+        return '<Customer "{}">'.format(self.customer_name)
 
 
 class Directory(db.Model):
@@ -51,7 +51,7 @@ class Directory(db.Model):
         return len(bin(IDENTITY_ACCESS['administrator']).replace('0b', '')) == len(bin(self.access).replace('0b', ''))
 
     def __repr__(self) -> str:
-        return '<Directory "">'.format(self.dir_path)
+        return '<Directory "{}">'.format(self.dir_path)
 
 
 @login_manager.user_loader

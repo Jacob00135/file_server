@@ -78,12 +78,6 @@
 }
 
 #dir_list > li.list-group-item {
-  white-space: nowrap;
-  /* 强制文本一行内显示，默认是normal自动换行 */
-  overflow: hidden;
-  /* 隐藏溢出部分 */
-  text-overflow: ellipsis;
-  /* 用省略号替代超出的部分 */
   display: flex;
   justify-content: space-between;
   height: 42px;
@@ -96,9 +90,16 @@
   display: none;
 }
 #dir_list > li.list-group-item .text {
+  white-space: nowrap;
+  /* 强制文本一行内显示，默认是normal自动换行 */
+  overflow: hidden;
+  /* 隐藏溢出部分 */
+  text-overflow: ellipsis;
+  /* 用省略号替代超出的部分 */
   flex: 1;
   height: 100%;
   line-height: 20px;
+  cursor: pointer;
 }
 #dir_list > li.list-group-item .glyphicon.glyphicon-user {
   width: 14px;
@@ -147,6 +148,11 @@
   padding: 0;
   border-width: 0;
   border-radius: 0;
+}
+#dir_list.update-status > li.list-group-item .dropdown > button .glyphicon {
+  position: absolute;
+  top: 13px;
+  left: 3px;
 }
 #dir_list.update-status > li.list-group-item .dropdown .dropdown-menu {
   left: auto;

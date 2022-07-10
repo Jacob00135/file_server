@@ -11,6 +11,7 @@
     const decideDeleteBtn = document.querySelector('#decide-delete-btn');
     const decideUpdateBtn = document.querySelector('#decide-update-btn');
     const accessButtonList = document.querySelectorAll('#dir_list button[data-access]');
+    const dirPathTextList = document.querySelectorAll('#dir_list > li.list-group-item > .text');
     const actionBtnList = [addDirBtn, deleteBtn, updateBtn];
 
     // ajax代替发送添加路径的表单
@@ -82,6 +83,11 @@
             // 隐藏条目复选框
             dirList.classList.remove('select-status');
 
+            // 注册.text点击事件
+            for (let i = 0; i < dirPathTextList.length; i++) {
+                dirPathTextList[i].addEventListener('click', showFullPath);
+            }
+
             // 取消勾选所有条目
             for (let i = 0; i < checkboxList.length; i++) {
                 let checkbox = checkboxList[i];
@@ -120,6 +126,11 @@
 
             // 显示条目复选框
             dirList.classList.add('select-status');
+
+            // 取消注册.text点击事件
+            for (let i = 0; i < dirPathTextList.length; i++) {
+                dirPathTextList[i].removeEventListener('click', showFullPath);
+            }
 
             // 取消勾选所有条目
             for (let i = 0; i < checkboxList.length; i++) {
@@ -312,5 +323,14 @@
             }
         });
     });
+
+    // 点击目录路径时，显示完整的文件名
+    for (let i = 0; i < dirPathTextList.length; i++) {
+        dirPathTextList[i].addEventListener('click', showFullPath);
+    }
+
+    function showFullPath() {
+        showWarningModal(this.innerHTML, '完整路径');
+    }
 
 })(window, document);

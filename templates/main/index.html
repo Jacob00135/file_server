@@ -1,12 +1,80 @@
 {% extends "base.html" %}
+{% import "macro.html" as component %}
 {% block title %}文件管理{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='main/css/index.css') }}" />
+{% endblock %}
 {% block content %}
-    <!-- 目录列表 -->
-    <ul class="list-group">
-        <li class="list-group-item">Cras justo odio</li>
-        <li class="list-group-item">Dapibus ac facilisis in</li>
-        <li class="list-group-item">Morbi leo risus</li>
-        <li class="list-group-item">Porta ac consectetur ac</li>
-        <li class="list-group-item">Vestibulum at eros</li>
-    </ul>
+
+    <!-- 警告模态框 [start] -->
+    {{ component.warning_modal() }}
+    <!-- 警告模态框 [end] -->
+
+    <!-- 页面主体 [start] -->
+    <div id="file_manage" class="container">
+
+        <h1>文件管理</h1>
+
+        <!-- 不用于罗列文件的列表组 [start] -->
+        <ul id="full-path" class="list-group">
+            <!-- 页面代表的目录的完整路径 [start] -->
+            {% if page_dir_path %}
+                <li class="list-group-item">{{ page_dir_path }}</li>
+            {% endif %}
+            <!-- 页面代表的目录的完整路径 [end] -->
+
+            <!-- 上一级目录链接 [start] -->
+            {% if prev_dir_path or prev_dir_path == '' %}
+                <li class="list-group-item">
+                    {% if dir_path %}
+                        <a href="{{ url_for('main.visit_visible_dir', dir_path=dir_path, path=prev_dir_path) }}">上一级</a>
+                    {% else %}
+                        <a href="{{ url_for('main.index') }}">上一级</a>
+                    {% endif %}
+                </li>
+            {% endif %}
+            <!-- 上一级目录链接 [end] -->
+        </ul>
+        <!-- 不用于罗列文件的列表组 [end] -->
+
+        <!-- 文件列表 [start] -->
+        <ul id="file-list" class="list-group">
+            {% for file_item in file_item_list %}
+                <li class="list-group-item">
+                    <span class="type glyphicon" data-type="{{ file_item.file_type }}"></span>
+                    <span class="name">
+                        {% if file_item.is_visible_dir %}
+                            <a href="{{ url_for('main.visit_visible_dir', dir_path=file_item.visible_dir_path) }}">{{ file_item.visible_dir_path }}</a>
+                        {% elif file_item.is_dir %}
+                            <a href="{{ url_for('main.visit_visible_dir', dir_path=file_item.visible_dir_path, path=file_item.path) }}">{{ file_item.name }}</a>
+                        {% else %}
+                            <a href="javascript:;">{{ file_item.name }}</a>
+                        {% endif %}
+                    </span>
+                    <span class="size">{{ file_item.size }}</span>
+                    <div class="dropdown action">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-{{ loop.index }}"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            <span class="glyphicon glyphicon-option-vertical"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown-{{ loop.index }}">
+                            <li><button type="button" class="btn btn-default">下载</button></li>
+                            <li><button type="button" class="btn btn-default show-full-name">完整文件名</button></li>
+                            {% if current_user.is_authenticated %}
+                                <li><button type="button" class="btn btn-default">重命名</button></li>
+                                <li><button type="button" class="btn btn-default">复制</button></li>
+                                <li><button type="button" class="btn btn-default">移动</button></li>
+                                <li><button type="button" class="btn btn-default">删除</button></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        <!-- 文件列表 [end] -->
+    </div>
+    <!-- 页面主体 [end] -->
+{% endblock %}
+{% block javascript %}
+    <script src="{{ url_for('static', filename='main/js/index.js') }}" type="text/javascript"></script>
 {% endblock %}

@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, render_template, abort, request
 from flask_login import current_user
 from models import Directory
-from utils import FileItem
+from utils import FileItem, sort_file_item
 
 main: Blueprint = Blueprint('main', __name__)
 
@@ -31,26 +31,53 @@ def index():
         dir_list: list = Directory.query.all()
     else:
         dir_list: list = Directory.query.filter_by(access=1).all()
-    return render_template('main/index.html', dir_list=dir_list)
+    file_item_list: list = []
+    for dir_object in dir_list:
+        try:
+            file_item: FileItem = FileItem(dir_object.dir_path, '', '')
+        except OSError:
+            continue
+        file_item_list.append(file_item)
+    sort_file_item(file_item_list)
+    return render_template('main/index.html', file_item_list=file_item_list)
 
 
 @main.route('/<dir_path>')
 def visit_visible_dir(dir_path):
-    # 检查权限
+    # 检查权限、路径是否仍存在
+    if not os.path.exists(dir_path):
+        abort(404)
     visible_dir: Directory = Directory.query.filter_by(dir_path=dir_path).first_or_404()
     if visible_dir.admin_level() and not current_user.is_authenticated:
         abort(403)
 
-    # 检查路径
-    full_path: str = os.path.abspath(os.path.join(dir_path, request.args.get('path', '', type=str)))
-    if not os.path.isdir(full_path) or os.path.exists(full_path):
+    # 检查子目录路径是否存在
+    path: str = request.args.get('path', '', type=str).lower().replace('/', '\\')
+    if path.startswith('\\'):
+        path: str = path[1:]
+    if path.endswith('\\'):
+        path: str = path[:-1]
+    if path != '' and os.path.commonprefix([dir_path, path]) == path:
+        abort(404)
+    page_dir_path: str = os.path.abspath(os.path.join(dir_path, path))
+    if not os.path.isdir(page_dir_path) or not os.path.exists(page_dir_path):
         abort(404)
 
     # 获取所有直属子目录和直属文件
     file_item_list: list = []
-    for f in os.listdir(full_path):
+    for file_name in os.listdir(page_dir_path):
         try:
-            file_item_list.append(FileItem(f))
+            file_item: FileItem = FileItem(dir_path, path, file_name)
         except OSError:
             continue
-    return render_template('main/index.html', file_item_list=file_item_list)
+        file_item_list.append(file_item)
+    sort_file_item(file_item_list)
+
+    # 响应
+    return render_template(
+        'main/index.html',
+        file_item_list=file_item_list,
+        dir_path=None if path == '' else dir_path,
+        prev_dir_path=os.path.split(path)[0],
+        page_dir_path=page_dir_path.replace('\\', ' \\ ')
+    )

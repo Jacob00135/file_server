@@ -59,7 +59,11 @@ window.ajax = {
     }
 }
 
-function showWarningModal(message) {
+function showWarningModal(message, title) {
+    const modal = document.querySelector('#warning-modal');
+    modal.querySelector('.modal-body > p').innerText = message;
+    if (title !== undefined) {
+        modal.querySelector('.modal-title').innerText = title;
+    }
     $('#warning-modal').modal('show');
-    document.querySelector('#warning-modal .modal-body > p').innerText = message;
 }
