@@ -10,6 +10,31 @@
     {{ component.warning_modal() }}
     <!-- 警告模态框 [end] -->
 
+    <!-- 警告模态框 [start] -->
+    <div id="download-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title text-danger">下载目录注意</h4>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li>下载整个目录时，将会把目录打包成压缩包下载</li>
+                        <li>目录大小不建议超过1GB，否则浏览器可能崩溃</li>
+                        <li>只会下载目录中的文件，子目录不会被下载</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary download" data-dismiss="modal" data-url="" data-dir-name="">继续下载</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">取消下载</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 警告模态框 [end] -->
+
     <!-- 页面主体 [start] -->
     <div id="file_manage" class="container">
 
@@ -48,7 +73,7 @@
                         {% elif file_item.is_dir %}
                             <a href="{{ url_for('main.visit_visible_dir', dir_path=file_item.visible_dir_path, path=file_item.path) }}">{{ file_item.name }}</a>
                         {% else %}
-                            <a href="javascript:;">{{ file_item.name }}</a>
+                            <a href="{{ url_for('main.download', dir_path=file_item.visible_dir_path, path=file_item.path, filename=file_item.name) }}" target="_blank">{{ file_item.name }}</a>
                         {% endif %}
                     </span>
                     <span class="size">{{ file_item.size }}</span>
@@ -58,7 +83,13 @@
                             <span class="glyphicon glyphicon-option-vertical"></span>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdown-{{ loop.index }}">
-                            <li><button type="button" class="btn btn-default">下载</button></li>
+                            <li>
+                                {% if file_item.file_type == 'dir' %}
+                                    <button type="button" class="btn btn-default download-dir" data-href="{{ url_for('main.download', dir_path=file_item.visible_dir_path, path=file_item.path) }}">下载</button>
+                                {% else %}
+                                    <a href="{{ url_for('main.download', dir_path=file_item.visible_dir_path, path=file_item.path, filename=file_item.name, attachment=True) }}" download="{{ file_item.name }}">下载</a>
+                                {% endif %}
+                            </li>
                             <li><button type="button" class="btn btn-default show-full-name">完整文件名</button></li>
                             {% if current_user.is_authenticated %}
                                 <li><button type="button" class="btn btn-default">重命名</button></li>

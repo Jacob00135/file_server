@@ -1,10 +1,33 @@
 import os
-from flask import Blueprint, render_template, abort, request
+from flask import Blueprint, render_template, abort, request, send_from_directory
 from flask_login import current_user
 from models import Directory
 from utils import FileItem, sort_file_item
 
 main: Blueprint = Blueprint('main', __name__)
+
+
+def check_path(dir_path: str):
+    # 检查权限、路径是否仍存在
+    if not os.path.exists(dir_path):
+        abort(404)
+    visible_dir: Directory = Directory.query.filter_by(dir_path=dir_path).first_or_404()
+    if visible_dir.admin_level() and not current_user.is_authenticated:
+        abort(403)
+
+    # 检查子目录路径是否存在
+    path: str = request.args.get('path', '', type=str).lower().replace('/', '\\')
+    if path.startswith('\\'):
+        path: str = path[1:]
+    if path.endswith('\\'):
+        path: str = path[:-1]
+    if path != '' and os.path.commonprefix([dir_path, path]) == path:
+        abort(404)
+    page_dir_path: str = os.path.abspath(os.path.join(dir_path, path))
+    if not os.path.isdir(page_dir_path) or not os.path.exists(page_dir_path):
+        abort(404)
+
+    return page_dir_path, path
 
 
 @main.app_errorhandler(403)
@@ -43,25 +66,11 @@ def index():
 
 
 @main.route('/<dir_path>')
-def visit_visible_dir(dir_path):
-    # 检查权限、路径是否仍存在
-    if not os.path.exists(dir_path):
-        abort(404)
-    visible_dir: Directory = Directory.query.filter_by(dir_path=dir_path).first_or_404()
-    if visible_dir.admin_level() and not current_user.is_authenticated:
-        abort(403)
-
-    # 检查子目录路径是否存在
-    path: str = request.args.get('path', '', type=str).lower().replace('/', '\\')
-    if path.startswith('\\'):
-        path: str = path[1:]
-    if path.endswith('\\'):
-        path: str = path[:-1]
-    if path != '' and os.path.commonprefix([dir_path, path]) == path:
-        abort(404)
-    page_dir_path: str = os.path.abspath(os.path.join(dir_path, path))
-    if not os.path.isdir(page_dir_path) or not os.path.exists(page_dir_path):
-        abort(404)
+def visit_visible_dir(dir_path: str):
+    # 检查请求参数
+    result: tuple = check_path(dir_path)
+    page_dir_path: str = result[0]
+    path: str = result[1]
 
     # 获取所有直属子目录和直属文件
     file_item_list: list = []
@@ -81,3 +90,33 @@ def visit_visible_dir(dir_path):
         prev_dir_path=os.path.split(path)[0],
         page_dir_path=page_dir_path.replace('\\', ' \\ ')
     )
+
+
+@main.route('/download/<dir_path>')
+def download(dir_path: str):
+    # 检查请求参数
+    result: tuple = check_path(dir_path)
+    page_dir_path: str = result[0]
+    file_name: str = request.args.get('filename', '', type=str)
+    full_path: str = os.path.abspath(os.path.join(page_dir_path, file_name))
+    if not os.path.exists(full_path):
+        abort(404)
+
+    # 下载非目录文件
+    if not os.path.isdir(full_path):
+        # 如果有中文乱码问题，则使用以下代码：
+        """from urllib.parse import quote
+        quote_file_name: str = quote(file_name)
+        rv = send_from_directory(page_dir_path, file_name, as_attachment=True, attachment_filename=quote_file_name)
+        rv.headers['Content-Disposition'] = rv.headers['Content-Disposition'] + "; filename*=utf-8''{}".format(quote_file_name)
+        return rv"""
+        attachment: bool = request.args.get('attachment', False, type=bool)
+        return send_from_directory(page_dir_path, file_name, as_attachment=attachment)
+
+    # 下载目录
+    file_name_list: list = []
+    for file_name in os.listdir(full_path):
+        file_path: str = os.path.abspath(os.path.join(full_path, file_name))
+        if os.path.exists(file_path) and not os.path.isdir(file_path):
+            file_name_list.append(file_name)
+    return {'status': 1, 'file_name_list': file_name_list}
