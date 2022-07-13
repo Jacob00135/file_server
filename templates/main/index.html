@@ -10,7 +10,7 @@
     {{ component.warning_modal() }}
     <!-- 警告模态框 [end] -->
 
-    <!-- 警告模态框 [start] -->
+    <!-- 下载模态框 [start] -->
     <div id="download-modal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -24,6 +24,7 @@
                         <li>下载整个目录时，将会把目录打包成压缩包下载</li>
                         <li>目录大小不建议超过1GB，否则浏览器可能崩溃</li>
                         <li>只会下载目录中的文件，子目录不会被下载</li>
+                        <li>下载整个目录的功能在手机浏览器中兼容性不好，更建议进入目录使用全选下载</li>
                     </ul>
                 </div>
                 <div class="modal-footer">
@@ -33,7 +34,70 @@
             </div>
         </div>
     </div>
-    <!-- 警告模态框 [end] -->
+    <!-- 下载模态框 [end] -->
+
+    <!-- 重命名模态框 [start] -->
+    <div id="rename-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">重命名</h4>
+                </div>
+                <div class="modal-body">
+                    <form name="rename" action="" method="post">
+                        <div class="form-group">
+                            <label for="old-name">旧文件名</label>
+                            <input id="old-name" class="form-control" type="text" value="" disabled />
+                        </div>
+                        <div class="form-group">
+                            <label for="new-name">新文件名(不能有\/:*?"<>|)</label>
+                            <input id="new-name" name="new-name" class="form-control" type="text" required autocomplete="off" oninput='value=value.replace(/[\\/:*?"<>|]/g, "")' />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg rename-btn">重命名</button>
+                        <div id="rename-warning" class="alert alert-danger hidden" role="alert"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 重命名模态框 [end] -->
+
+    <!-- 复制模态框 [start] -->
+    <div id="copy-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">复制</h4>
+                </div>
+                <div class="modal-body">
+                    <form name="copy" action="" method="post">
+                        <div class="form-group">
+                            <label for="source-path">原路径</label>
+                            <input id="source-path" class="form-control" type="text" value="" disabled />
+                        </div>
+                        <div class="form-group">
+                            <label for="target-path">目标路径</label>
+                            <input id="target-path" name="target-path" class="form-control" type="text" required autocomplete="off" />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg copy-btn">复制</button>
+                        <div id="copy-info" class="alert alert-info hidden" role="alert">正在复制...完毕后将会刷新页面</div>
+                        <div id="copy-warning" class="alert alert-danger hidden" role="alert"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 复制模态框 [end] -->
 
     <!-- 页面主体 [start] -->
     <div id="file_manage" class="container">
@@ -71,7 +135,7 @@
                         {% if file_item.is_visible_dir %}
                             <a href="{{ url_for('main.visit_visible_dir', dir_path=file_item.visible_dir_path) }}">{{ file_item.visible_dir_path }}</a>
                         {% elif file_item.is_dir %}
-                            <a href="{{ url_for('main.visit_visible_dir', dir_path=file_item.visible_dir_path, path=file_item.path) }}">{{ file_item.name }}</a>
+                            <a href="{{ url_for('main.visit_visible_dir', dir_path=file_item.visible_dir_path, path=file_item.path) }}">{{ file_item.name}}</a>
                         {% else %}
                             <a href="{{ url_for('main.download', dir_path=file_item.visible_dir_path, path=file_item.path, filename=file_item.name) }}" target="_blank">{{ file_item.name }}</a>
                         {% endif %}
@@ -92,8 +156,10 @@
                             </li>
                             <li><button type="button" class="btn btn-default show-full-name">完整文件名</button></li>
                             {% if current_user.is_authenticated %}
-                                <li><button type="button" class="btn btn-default">重命名</button></li>
-                                <li><button type="button" class="btn btn-default">复制</button></li>
+                                <li><button type="button" class="btn btn-default rename" data-href="{{ url_for('main.rename', dir_path=file_item.visible_dir_path, path=file_item.path, filename='' if file_item.file_type == 'dir' else file_item.name) }}">重命名</button></li>
+                                {% if file_item.file_type != 'dir' %}
+                                    <li><button type="button" class="btn btn-default copy" data-href="{{ url_for('main.copy_file', dir_path=file_item.visible_dir_path, path=file_item.path, filename=file_item.name) }}" data-source-path="{{ file_item.page_dir_path }}">复制</button></li>
+                                {% endif %}
                                 <li><button type="button" class="btn btn-default">移动</button></li>
                                 <li><button type="button" class="btn btn-default">删除</button></li>
                             {% endif %}

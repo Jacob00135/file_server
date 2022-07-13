@@ -1,13 +1,17 @@
 import os
+import re
+import shutil
 from flask import Blueprint, render_template, abort, request, send_from_directory
 from flask_login import current_user
 from models import Directory
 from utils import FileItem, sort_file_item
+from config import db
+from decorators import anonymous_forbidden
 
 main: Blueprint = Blueprint('main', __name__)
 
 
-def check_path(dir_path: str):
+def check_path(dir_path: str) -> tuple:
     # 检查权限、路径是否仍存在
     if not os.path.exists(dir_path):
         abort(404)
@@ -21,13 +25,24 @@ def check_path(dir_path: str):
         path: str = path[1:]
     if path.endswith('\\'):
         path: str = path[:-1]
-    if path != '' and os.path.commonprefix([dir_path, path]) == path:
+    if (path != '' and os.path.commonprefix([dir_path, path]) == path) or os.path.isabs(path):
         abort(404)
     page_dir_path: str = os.path.abspath(os.path.join(dir_path, path))
     if not os.path.isdir(page_dir_path) or not os.path.exists(page_dir_path):
         abort(404)
 
     return page_dir_path, path
+
+
+def check_filename(dir_path: str) -> tuple:
+    result: tuple = check_path(dir_path)
+    page_dir_path: str = result[0]
+    file_name: str = request.args.get('filename', '', type=str)
+    full_path: str = os.path.abspath(os.path.join(page_dir_path, file_name))
+    if not os.path.exists(full_path):
+        abort(404)
+
+    return page_dir_path, file_name, full_path
 
 
 @main.app_errorhandler(403)
@@ -88,19 +103,17 @@ def visit_visible_dir(dir_path: str):
         file_item_list=file_item_list,
         dir_path=None if path == '' else dir_path,
         prev_dir_path=os.path.split(path)[0],
-        page_dir_path=page_dir_path.replace('\\', ' \\ ')
+        page_dir_path=page_dir_path
     )
 
 
 @main.route('/download/<dir_path>')
 def download(dir_path: str):
     # 检查请求参数
-    result: tuple = check_path(dir_path)
+    result: tuple = check_filename(dir_path)
     page_dir_path: str = result[0]
-    file_name: str = request.args.get('filename', '', type=str)
-    full_path: str = os.path.abspath(os.path.join(page_dir_path, file_name))
-    if not os.path.exists(full_path):
-        abort(404)
+    file_name: str = result[1]
+    full_path: str = result[2]
 
     # 下载非目录文件
     if not os.path.isdir(full_path):
@@ -120,3 +133,69 @@ def download(dir_path: str):
         if os.path.exists(file_path) and not os.path.isdir(file_path):
             file_name_list.append(file_name)
     return {'status': 1, 'file_name_list': file_name_list}
+
+
+@main.route('/rename/<dir_path>', methods=['POST'])
+@anonymous_forbidden
+def rename(dir_path: str):
+    # 检查请求参数
+    result: tuple = check_filename(dir_path)
+    file_name: str = result[1]
+    full_path: str = result[2]
+
+    # 检查表单参数
+    new_name: str = request.form.get('new-name', '', type=str)
+    if new_name == '':
+        return {'status': 0, 'message': '文件名不能为空！'}
+    if new_name.lower() == file_name.lower():
+        return {'status': 0, 'message': '新旧文件名不能相同！'}
+    if re.findall('[\\\/:*?"<>|]', new_name):
+        return {'status': 0, 'message': '文件名不能包含\\/:*?"<>|！'}
+    new_path: str = os.path.abspath(os.path.join(os.path.split(full_path)[0], new_name))
+    if os.path.exists(new_path):
+        return {'status': 0, 'message': '新文件名已存在'}
+
+    # 重命名
+    try:
+        os.rename(full_path, new_path)
+    except Exception:
+        return {'status': 0, 'message': '重命名失败'}
+    dir_object: Directory = Directory.query.filter_by(dir_path=full_path).first()
+    if dir_object is not None:
+        dir_object.dir_path = new_path.lower()
+        db.session.add(dir_object)
+        db.session.commit()
+
+    return {'status': 1}
+
+
+@main.route('/copy/<dir_path>', methods=['POST'])
+@anonymous_forbidden
+def copy_file(dir_path: str):
+    # 检查请求参数
+    result: tuple = check_filename(dir_path)
+    page_dir_path: str = result[0]
+    file_name: str = result[1]
+    full_path: str = result[2]
+
+    # 检查表单参数
+    target_path: str = request.form.get('target-path', '', type=str)
+    if target_path == '':
+        return {'status': 0, 'message': '目标路径不能为空！'}
+    if target_path.lower() == page_dir_path.lower():
+        return {'status': 0, 'message': '原路径与目标路径不能相同！'}
+    if not os.path.exists(target_path):
+        return {'status': 0, 'message': '目标路径不存在！'}
+    target_file_path: str = os.path.abspath(os.path.join(target_path, file_name))
+    if os.path.exists(target_file_path):
+        return {'status': 0, 'message': '目标路径已存在相同名称的文件！'}
+    if os.path.isdir(full_path):
+        return {'status': 0, 'message': '不能复制目录，只能复制文件'}
+
+    # 复制
+    try:
+        shutil.copy(full_path, target_file_path)
+    except Exception:
+        return {'status': 0, 'message': '复制失败'}
+
+    return {'status': 1}

@@ -4,6 +4,45 @@
     @include h1-title();
 }
 
+// 重命名模态框
+#rename-modal {
+
+    input {
+        @include small-lg-height();
+        @include clear-input-transition();
+    }
+
+    .rename-btn {
+        @include small-lg-height();
+    }
+
+    #rename-warning {
+        @include small-lg-height();
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+}
+
+// 复制模态框
+#copy-modal {
+
+    input {
+        @include small-lg-height();
+        @include clear-input-transition();
+    }
+
+    .copy-btn {
+        @include small-lg-height();
+    }
+
+    #copy-info,
+    #copy-warning {
+        @include small-lg-height();
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+}
+
 // 完整路径
 #full-path {
     margin-bottom: -1px;

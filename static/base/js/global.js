@@ -64,10 +64,7 @@ window.ajax = {
         xhr.responseType = 'blob';
         xhr.addEventListener('readystatechange', function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
-                const file = xhr.response;
-                const splitList = xhr.getResponseHeader('content-disposition').split("'");
-                file.name = decodeURI(splitList[splitList.length - 1]);
-                callback(file);
+                callback(xhr.response);
             }
         });
     }
@@ -99,28 +96,30 @@ function downloadDir(url, zipName) {
         }
 
         // 构建文件下载网址
-        const fileUrlList = [];
+        const fileInfo = {
+            'name': fileNameList,
+            'url': []
+        };
         for (let i = 0; i < fileNameList.length; i++) {
-            fileUrlList.push(url + '&filename=' + fileNameList[i]);
+            fileInfo['url'].push(url + '&filename=' + fileNameList[i]);
         }
 
         // 下载文件
         showWarningModal('正在下载...请不要离开此页面');
-        recursionDownloadFile(fileUrlList, zipName, new JSZip());
+        recursionDownloadFile(fileInfo, zipName, new JSZip());
     });
 }
 
-function recursionDownloadFile(fileUrlList, zipName, jsZipObject) {
-    ajax.getFile(fileUrlList.shift(), function (file) {
-        jsZipObject.file(file.name, file);
-        if (fileUrlList.length === 0) {
+function recursionDownloadFile(fileInfo, zipName, jsZipObject) {
+    ajax.getFile(fileInfo['url'].shift(), function (file) {
+        jsZipObject.file(fileInfo['name'].shift(), file);
+        if (fileInfo['url'].length === 0) {
             jsZipObject.generateAsync({'type': 'blob'}).then(function (content) {
                 saveAs(content, zipName + '.zip');
                 showWarningModal('下载完毕');
             });
         } else {
-            showWarningModal('下载成功：' + file.name);
-            recursionDownloadFile(fileUrlList, zipName, jsZipObject);
+            recursionDownloadFile(fileInfo, zipName, jsZipObject);
         }
     });
 }

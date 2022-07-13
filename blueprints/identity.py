@@ -2,22 +2,13 @@ import os.path
 import json
 import re
 from json.decoder import JSONDecodeError
-from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import current_user, login_user, logout_user
 from config import db
 from models import Customer, Directory
+from decorators import anonymous_forbidden
 
 identity: Blueprint = Blueprint('identity', __name__)
-
-
-def anonymous_forbidden(f):
-    @wraps(f)
-    def func(*args, **kwargs):
-        if not current_user.is_authenticated:
-            abort(403)
-        return f(*args, **kwargs)
-    return func
 
 
 @identity.route('/login', methods=['GET', 'POST'])

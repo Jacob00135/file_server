@@ -19,7 +19,10 @@ class BaseTestCase(unittest.TestCase):
     }
     main_bp: dict = {
         'index': '/',
-        'visit_visible_dir': '/{}'
+        'visit_visible_dir': '/{}',
+        'download': '/download/{}',
+        'rename': '/rename/{}',
+        'copy': '/copy/{}'
     }
 
     def setUp(self) -> None:

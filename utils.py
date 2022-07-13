@@ -17,7 +17,8 @@ class FileItem(object):
             self.path: str = self.path[1:]
 
         # 检查完整的文件路径
-        self.full_path: str = os.path.abspath(os.path.join(self.visible_dir_path, self.path, self.name))
+        self.page_dir_path = os.path.abspath(os.path.join(self.visible_dir_path, self.path))
+        self.full_path: str = os.path.abspath(os.path.join(self.page_dir_path, self.name))
         if not os.path.exists(self.full_path):
             raise OSError
 
