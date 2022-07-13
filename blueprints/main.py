@@ -160,7 +160,7 @@ def rename(dir_path: str):
         os.rename(full_path, new_path)
     except Exception:
         return {'status': 0, 'message': '重命名失败'}
-    dir_object: Directory = Directory.query.filter_by(dir_path=full_path).first()
+    dir_object: Directory = Directory.query.filter_by(dir_path=full_path.lower()).first()
     if dir_object is not None:
         dir_object.dir_path = new_path.lower()
         db.session.add(dir_object)
@@ -197,5 +197,57 @@ def copy_file(dir_path: str):
         shutil.copy(full_path, target_file_path)
     except Exception:
         return {'status': 0, 'message': '复制失败'}
+
+    return {'status': 1}
+
+
+@main.route('/move/<dir_path>', methods=['POST'])
+@anonymous_forbidden
+def move_file(dir_path: str):
+    # 检查请求参数
+    result: tuple = check_filename(dir_path)
+    page_dir_path: str = result[0]
+    file_name: str = result[1]
+    full_path: str = result[2]
+
+    # 检查表单参数
+    new_path: str = request.form.get('new-path', '', type=str)
+    if new_path == '':
+        return {'status': 0, 'message': '新路径不能为空！'}
+    if new_path.lower() == page_dir_path.lower():
+        return {'status': 0, 'message': '原路径与新路径不能相同！'}
+    if not os.path.exists(new_path):
+        return {'status': 0, 'message': '新路径不存在！'}
+    new_file_path: str = os.path.abspath(os.path.join(new_path, file_name))
+    if os.path.exists(new_file_path):
+        return {'status': 0, 'message': '新路径已存在相同名称的文件！'}
+    if os.path.isdir(full_path):
+        return {'status': 0, 'message': '不能移动目录，只能移动文件'}
+
+    # 移动
+    try:
+        shutil.move(full_path, new_file_path)
+    except Exception:
+        return {'status': 0, 'message': '移动失败'}
+
+    return {'status': 1}
+
+
+@main.route('/remove/<dir_path>', methods=['POST'])
+@anonymous_forbidden
+def remove_file(dir_path: str):
+    # 检查请求参数
+    result: tuple = check_filename(dir_path)
+    full_path: str = result[2]
+
+    # 检查路径
+    if os.path.isdir(full_path):
+        return {'status': 0, 'message': '不能删除目录，只能删除文件'}
+
+    # 删除
+    try:
+        os.remove(full_path)
+    except Exception:
+        return {'status': 0, 'message': '删除失败'}
 
     return {'status': 1}

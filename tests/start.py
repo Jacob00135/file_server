@@ -22,7 +22,9 @@ class BaseTestCase(unittest.TestCase):
         'visit_visible_dir': '/{}',
         'download': '/download/{}',
         'rename': '/rename/{}',
-        'copy': '/copy/{}'
+        'copy': '/copy/{}',
+        'move': '/move/{}',
+        'remove': '/remove/{}'
     }
 
     def setUp(self) -> None:

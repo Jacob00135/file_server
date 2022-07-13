@@ -43,6 +43,40 @@
     }
 }
 
+// 移动模态框
+#move-modal {
+    input {
+        @include small-lg-height();
+        @include clear-input-transition();
+    }
+
+    .move-btn {
+        @include small-lg-height();
+    }
+
+    #move-info,
+    #move-warning {
+        @include small-lg-height();
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+}
+
+// 删除模态框
+#remove-modal {
+    .remove-file-name {
+        margin: 0;
+        padding: 0 4px;
+    }
+
+    #remove-warning,
+    #remove-info {
+        @include small-lg-height();
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+}
+
 // 完整路径
 #full-path {
     margin-bottom: -1px;

@@ -11,6 +11,14 @@
     const copyBtnList = document.querySelectorAll('#file-list .copy');
     const copyWarning = document.querySelector('#copy-warning');
     const copyInfo = document.querySelector('#copy-info');
+    const moveForm = document.querySelector('form[name="move"]');
+    const moveBtnList = document.querySelectorAll('#file-list .move');
+    const moveWarning = document.querySelector('#move-warning');
+    const moveInfo = document.querySelector('#move-info');
+    const removeBtnList = document.querySelectorAll('#file-list .remove');
+    const decideRemoveBtn = document.querySelector('#remove-modal .remove');
+    const removeWarning = document.querySelector('#remove-warning');
+    const removeInfo = document.querySelector('#remove-info');
     const iconfontMap = {
         'dir': 'glyphicon-folder-open',
         'text': 'glyphicon-file',
@@ -144,5 +152,87 @@
             }
         }
     );
+
+    // “移动”按钮的点击事件
+    for (let i = 0; i < moveBtnList.length; i++) {
+        moveBtnList[i].addEventListener('click', function (e) {
+            moveForm.action = this.getAttribute('data-href');
+            moveForm.querySelector('#move-source-path').value = this.getAttribute('data-source-path');
+            moveForm.querySelector('#new-path').value = '';
+            $('#move-modal').modal('show');
+        });
+    }
+
+    // 移动表单的提交事件
+    ajaxSubmitForm(
+        'move',
+        function (form) {
+            // 检查路径中是否包含"\\"
+            const sourcePath = form.querySelector('#move-source-path').value.toLowerCase();
+            const newPath = form.querySelector('#new-path').value.toLowerCase();
+            if (newPath.indexOf('\\') < 0) {
+                moveWarning.innerHTML = '路径不存在！';
+                moveWarning.classList.remove('hidden');
+                return false;
+            }
+
+            // 检查原路径和新路径是否相同
+            if (sourcePath === newPath) {
+                moveWarning.innerHTML = '原路径与新路径不能相同！';
+                moveWarning.classList.remove('hidden');
+                return false;
+            }
+
+            moveWarning.classList.add('hidden');
+            moveInfo.classList.remove('hidden');
+            $('#move-modal').modal('show');
+            return true;
+        },
+        function (data) {
+            if (data.status === 0) {
+                moveInfo.classList.add('hidden');
+                moveWarning.innerHTML = data.message;
+                moveWarning.classList.remove('hidden');
+            } else {
+                location.reload();
+            }
+        }
+    );
+
+    // “删除”按钮的点击事件
+    for (let i = 0; i < removeBtnList.length; i++) {
+        removeBtnList[i].addEventListener('click', function (e) {
+            document.querySelector('#remove-modal .remove-file-name').innerHTML = fileList.children[Number(this.getAttribute('data-index'))].querySelector('.name a').innerHTML;
+            decideRemoveBtn.setAttribute('data-href', this.getAttribute('data-href'));
+            $('#remove-modal').modal('show');
+        });
+    }
+
+    // 删除模态框中的“确定删除”按钮点击事件
+    decideRemoveBtn.allowSubmit = true;
+    decideRemoveBtn.addEventListener('click', function (e) {
+        // 防止提交太快
+        if (!decideRemoveBtn.allowSubmit) {
+            return undefined;
+        }
+        decideRemoveBtn.setAttribute('disabled', '');
+        decideRemoveBtn.allowSubmit = false;
+        removeWarning.classList.add('hidden');
+        removeInfo.classList.remove('hidden');
+
+        // 提交表单
+        const formData = new FormData();
+        ajax.post(this.getAttribute('data-href'), '', function (data) {
+            if (data.status === 0) {
+                removeInfo.classList.add('hidden');
+                removeWarning.innerHTML = data.message;
+                removeWarning.classList.remove('hidden');
+                decideRemoveBtn.removeAttribute('disabled');
+                decideRemoveBtn.allowSubmit = true;
+            } else {
+                location.reload();
+            }
+        });
+    });
 
 })(window, document);

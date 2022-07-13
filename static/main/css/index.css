@@ -61,6 +61,47 @@
   margin-bottom: 10px;
 }
 
+#move-modal input {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  transition: none;
+}
+#move-modal input:hover {
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+#move-modal input:focus {
+  -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+#move-modal .move-btn {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+#move-modal #move-info,
+#move-modal #move-warning {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#remove-modal .remove-file-name {
+  margin: 0;
+  padding: 0 4px;
+}
+#remove-modal #remove-warning,
+#remove-modal #remove-info {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 #full-path {
   margin-bottom: -1px;
 }

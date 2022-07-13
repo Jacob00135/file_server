@@ -287,3 +287,121 @@ class CopyTestCase(BaseTestCase):
         self.assertTrue(response.status_code == 200)
         self.assertTrue(response.json['status'] == 1)
         os.remove(os.path.abspath(os.path.join(self.dir_path, 'blueprints', 'requirements.txt')))
+
+
+class MoveTestCase(BaseTestCase):
+
+    def setUp(self) -> None:
+        super(MoveTestCase, self).setUp()
+        self.dir_path = BASE_DIR.lower()
+        db.session.add(Directory(dir_path=self.dir_path, access=1))
+        db.session.commit()
+
+    def test_move_1(self):
+        """未登录用户请求移动：403"""
+        url: str = self.main_bp['move'].format(self.dir_path) + '?filename=requirements.txt'
+        data: dict = {'new-path': self.dir_path}
+        response: TestResponse = self.client.post(url, data=data)
+        self.assertTrue(response.status_code == 403)
+
+    def test_move_2(self):
+        """请求移动：新路径为空"""
+        self.login('admin', '123456')
+        url: str = self.main_bp['move'].format(self.dir_path) + '?filename=requirements.txt'
+        data: dict = {'new-path': ''}
+        response: TestResponse = self.client.post(url, data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '新路径不能为空！')
+
+    def test_move_3(self):
+        """请求移动：原路径与新路径相同"""
+        self.login('admin', '123456')
+        url: str = self.main_bp['move'].format(self.dir_path) + '?filename=requirements.txt'
+        data: dict = {'new-path': self.dir_path}
+        response: TestResponse = self.client.post(url, data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '原路径与新路径不能相同！')
+
+    def test_move_4(self):
+        """请求移动：新路径不存在"""
+        self.login('admin', '123456')
+        url: str = self.main_bp['move'].format(self.dir_path) + '?filename=requirements.txt'
+        data: dict = {'new-path': os.path.abspath(os.path.join(self.dir_path, 'test'))}
+        response: TestResponse = self.client.post(url, data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '新路径不存在！')
+
+    def test_move_5(self):
+        """请求移动：新路径已存在相同名称的文件"""
+        source_path: str = os.path.abspath(os.path.join(self.dir_path, 'requirements.txt'))
+        new_path: str = os.path.abspath(os.path.join(self.dir_path, 'blueprints', 'requirements.txt'))
+        shutil.copy(source_path, new_path)
+        self.login('admin', '123456')
+        url: str = self.main_bp['move'].format(self.dir_path) + '?filename=requirements.txt'
+        data: dict = {'new-path': os.path.abspath(os.path.join(self.dir_path, 'blueprints'))}
+        response: TestResponse = self.client.post(url, data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '新路径已存在相同名称的文件！')
+        os.remove(new_path)
+
+    def test_move_6(self):
+        """请求移动：尝试移动目录"""
+        self.login('admin', '123456')
+        url: str = self.main_bp['move'].format(self.dir_path) + '?filename=blueprints'
+        data: dict = {'new-path': os.path.abspath(os.path.join(self.dir_path, 'static'))}
+        response: TestResponse = self.client.post(url, data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '不能移动目录，只能移动文件')
+
+    def test_move_7(self):
+        """请求移动：成功"""
+        self.login('admin', '123456')
+        url: str = self.main_bp['move'].format(self.dir_path) + '?filename=requirements.txt'
+        data: dict = {'new-path': os.path.abspath(os.path.join(self.dir_path, 'blueprints'))}
+        response: TestResponse = self.client.post(url, data=data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 1)
+        old_path: str = os.path.abspath(os.path.join(self.dir_path, 'blueprints', 'requirements.txt'))
+        new_path: str = os.path.abspath(os.path.join(self.dir_path, 'requirements.txt'))
+        shutil.move(old_path, new_path)
+
+
+class RemoveTestCase(BaseTestCase):
+
+    def setUp(self) -> None:
+        super(RemoveTestCase, self).setUp()
+        self.dir_path = BASE_DIR.lower()
+        db.session.add(Directory(dir_path=self.dir_path, access=1))
+        db.session.commit()
+
+    def test_remove_1(self):
+        """未登录用户请求删除：403"""
+        url: str = self.main_bp['remove'].format(self.dir_path) + '?filename=requirements.txt'
+        response: TestResponse = self.client.post(url)
+        self.assertTrue(response.status_code == 403)
+
+    def test_remove_2(self):
+        """请求删除：尝试删除目录"""
+        self.login('admin', '123456')
+        url: str = self.main_bp['remove'].format(self.dir_path) + '?filename=database_sqlite'
+        response: TestResponse = self.client.post(url)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 0)
+        self.assertTrue(response.json['message'] == '不能删除目录，只能删除文件')
+
+    def test_remove_3(self):
+        """请求删除：成功"""
+        source_path: str = os.path.abspath(os.path.join(self.dir_path, 'requirements.txt'))
+        target_path: str = os.path.abspath(os.path.join(self.dir_path, 'blueprints', 'requirements.txt'))
+        shutil.copy(source_path, target_path)
+        self.login('admin', '123456')
+        url: str = self.main_bp['remove'].format(self.dir_path) + '?filename=requirements.txt'
+        response: TestResponse = self.client.post(url)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json['status'] == 1)
+        shutil.move(target_path, source_path)

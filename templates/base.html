@@ -16,7 +16,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='base/css/base.css') }}" />
 </head>
 <body>
-    <!-- 修改密码模态框 -->
+    {% if current_user.is_authenticated %}
+    <!-- 修改密码模态框 [strart] -->
     <div class="modal fade" id="update-password-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -45,6 +46,8 @@
             </div>
         </div>
     </div>
+    <!-- 修改密码模态框 [end] -->
+    {% endif %}
 
     <!-- 导航栏 [start] -->
     <nav id="nav" class="navbar navbar-default navbar-fixed-top">

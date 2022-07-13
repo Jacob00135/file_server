@@ -99,6 +99,61 @@
     </div>
     <!-- 复制模态框 [end] -->
 
+    <!-- 移动模态框 [start] -->
+    <div id="move-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">移动</h4>
+                </div>
+                <div class="modal-body">
+                    <form name="move" action="" method="post">
+                        <div class="form-group">
+                            <label for="move-source-path">原路径</label>
+                            <input id="move-source-path" class="form-control" type="text" value="" disabled />
+                        </div>
+                        <div class="form-group">
+                            <label for="new-path">新路径</label>
+                            <input id="new-path" name="new-path" class="form-control" type="text" required autocomplete="off" />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg move-btn">移动</button>
+                        <div id="move-info" class="alert alert-info hidden" role="alert">正在移动...完毕后将会刷新页面</div>
+                        <div id="move-warning" class="alert alert-danger hidden" role="alert"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 移动模态框 [end] -->
+
+    <!-- 删除模态框 [start] -->
+    <div id="remove-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">删除</h4>
+                </div>
+                <div class="modal-body">
+                    <p>确定删除：<span class="alert alert-danger remove-file-name" role="alert"></span>？</p>
+                    <div id="remove-info" class="alert alert-info hidden" role="alert">正在删除...完毕后将会刷新页面</div>
+                    <div id="remove-warning" class="alert alert-danger hidden" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger remove" data-href="">确定删除</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 删除模态框 [end] -->
+
     <!-- 页面主体 [start] -->
     <div id="file_manage" class="container">
 
@@ -159,9 +214,9 @@
                                 <li><button type="button" class="btn btn-default rename" data-href="{{ url_for('main.rename', dir_path=file_item.visible_dir_path, path=file_item.path, filename='' if file_item.file_type == 'dir' else file_item.name) }}">重命名</button></li>
                                 {% if file_item.file_type != 'dir' %}
                                     <li><button type="button" class="btn btn-default copy" data-href="{{ url_for('main.copy_file', dir_path=file_item.visible_dir_path, path=file_item.path, filename=file_item.name) }}" data-source-path="{{ file_item.page_dir_path }}">复制</button></li>
+                                    <li><button type="button" class="btn btn-default move" data-href="{{ url_for('main.move_file', dir_path=file_item.visible_dir_path, path=file_item.path, filename=file_item.name) }}" data-source-path="{{ file_item.page_dir_path }}">移动</button></li>
+                                    <li><button type="button" class="btn btn-default remove" data-href="{{ url_for('main.remove_file', dir_path=file_item.visible_dir_path, path=file_item.path, filename=file_item.name) }}" data-index="{{ loop.index0 }}">删除</button></li>
                                 {% endif %}
-                                <li><button type="button" class="btn btn-default">移动</button></li>
-                                <li><button type="button" class="btn btn-default">删除</button></li>
                             {% endif %}
                         </ul>
                     </div>
