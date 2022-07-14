@@ -19,6 +19,12 @@
     const decideRemoveBtn = document.querySelector('#remove-modal .remove');
     const removeWarning = document.querySelector('#remove-warning');
     const removeInfo = document.querySelector('#remove-info');
+    const uploadFileForm = document.querySelector('form[name="upload-file"]');
+    const uploadFileInput = document.querySelector('form[name="upload-file"] input[type="file"]');
+    const uploadWarning = document.querySelector('#upload-warning');
+    const uploadInfo = document.querySelector('#upload-info');
+    const uploadFileProgress = document.querySelector('#upload-file-progress');
+    const pageNav = document.querySelector('#page-nav');
     const iconfontMap = {
         'dir': 'glyphicon-folder-open',
         'text': 'glyphicon-file',
@@ -28,6 +34,107 @@
         'package': 'glyphicon-compressed',
         'other': 'glyphicon-question-sign'
     };
+
+    // 加载分页导航
+    if (pageNav !== null) {
+        // 获取导航信息
+        const page = parseInt(pageNav.getAttribute('data-page'));
+        const pageCount = parseInt(pageNav.getAttribute('data-page-count'));
+        const baseUrl = pageNav.getAttribute('data-base-url');
+        const ul = pageNav.querySelector('ul.pagination');
+        const first = ul.querySelector('li.first');
+        const last = ul.querySelector('li.last');
+
+        // 获取一个分页导航中的链接
+        function getLi(page) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+
+            a.href = addSearchParam(baseUrl, {'page': page});
+            a.innerHTML = page;
+            li.appendChild(a);
+            return li;
+        }
+
+        // 获取一个分页导航中的省略号
+        function getEl() {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+
+            li.classList.add('disabled');
+            li.classList.add('ellipsis');
+            a.href = 'javascript:;';
+            a.innerHTML = '...';
+            li.appendChild(a);
+            return li;
+        }
+
+        // 处理数字页码
+        first.querySelector('a').href = addSearchParam(baseUrl, {'page': 1});
+        last.querySelector('a').href = addSearchParam(baseUrl, {'page': pageCount});
+        if (pageCount <= 5) {
+            for (let i = 2; i < pageCount; i++) {
+                ul.insertBefore(getLi(i), last);
+            }
+        } else {
+            const numberList = [];
+            if (page === pageCount) numberList.push(pageCount - 2);
+            if (page - 1 > 1) numberList.push(page - 1);
+            if (page !== 1 && page !== pageCount) numberList.push(page);
+            if (page + 1 < pageCount) numberList.push(page + 1);
+            if (page === 1)  numberList.push(3);
+            numberList.forEach((value) => {
+                ul.insertBefore(getLi(value), last);
+            })
+
+            // 插入省略号页码
+            const li3 = ul.children[2];
+            const liLowest3 = ul.children[ul.children.length - 3];
+            if (parseInt(li3.querySelector('a').innerHTML) - 1 >= 2) ul.insertBefore(getEl(), li3);
+            if (pageCount - parseInt(liLowest3.querySelector('a').innerHTML) >= 2) ul.insertBefore(getEl(), last);
+        }
+
+        // 使当前页的页码处于激活状态
+        for (let i = 0; i < ul.children.length; i++) {
+            let children = ul.children[i];
+            if (children.querySelector('a').innerHTML === String(page)) {
+                children.classList.add('active');
+                children.querySelector('a').href = 'javascript:;';
+                break;
+            }
+        }
+
+        // 处理上一页、下一页页码
+        const prev = ul.children[0];
+        const next = ul.children[ul.children.length - 1];
+        if (page === 1) {
+            prev.classList.add('disabled');
+            next.querySelector('a').href = addSearchParam(baseUrl, {'page': page + 1});
+        } else if (page === pageCount) {
+            prev.querySelector('a').href = addSearchParam(baseUrl, {'page': page - 1});
+            next.classList.add('disabled');
+        } else {
+            prev.querySelector('a').href = addSearchParam(baseUrl, {'page': page - 1});
+            next.querySelector('a').href = addSearchParam(baseUrl, {'page': page + 1});
+        }
+
+        // 跳转页面的输入页码监听事件
+        document.getElementById('jump-page').addEventListener('input', function (e) {
+            this.value = this.value.replace(/\D/g, '');
+            const newValue = parseInt(this.value);
+            if (isNaN(newValue) || newValue <= 0) {
+                this.value = 1;
+            } else if (newValue > pageCount) {
+                this.value = pageCount;
+            }
+        });
+
+        // 跳转按钮点击事件
+        pageNav.querySelector('.jump-page-btn').addEventListener('click', function (e) {
+            const jumpPage = document.getElementById('jump-page').value || 1;
+            location.href = addSearchParam(baseUrl, {'page': jumpPage});
+        });
+    }
 
     // 渲染文件类型对应的字体图标
     for (let i = 0; i < typeList.length; i++) {
@@ -234,5 +341,45 @@
             }
         });
     });
+
+    // 选择文件事件
+    uploadFileInput.addEventListener('change', function (e) {
+        if (this.files.length <= 0) return undefined;
+        const file = this.files[0];
+        uploadFileForm.querySelector('.file-input .text').innerText = file.name;
+    });
+
+    // 文件上传进度条控制
+    function setUploadProgress (value) {
+        const bar = uploadFileProgress.querySelector('.progress-bar');
+        bar.setAttribute('aria-valuenow', value);
+        bar.style.width = value + '%';
+        bar.innerHTML = value + '%';
+    }
+
+    // 上传文件表单提交
+    ajaxUploadFile(
+        'upload-file',
+        undefined,
+        function (value) {
+            if (0 < value && value < 100) {
+                uploadFileProgress.classList.remove('hidden');
+                setUploadProgress(value);
+            } else if (value >= 100) {
+                setUploadProgress(value);
+                uploadInfo.classList.remove('hidden');
+            }
+        },
+        function (data) {
+            if (data.status === 0) {
+                uploadFileProgress.classList.add('hidden');
+                uploadInfo.classList.add('hidden');
+                uploadWarning.innerHTML = data.message;
+                uploadWarning.classList.remove('hidden');
+            } else {
+                location.reload();
+            }
+        }
+    );
 
 })(window, document);

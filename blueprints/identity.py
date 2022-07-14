@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from flask_login import current_user, login_user, logout_user
 from config import db
 from models import Customer, Directory
-from decorators import anonymous_forbidden
+from utils import anonymous_forbidden
 
 identity: Blueprint = Blueprint('identity', __name__)
 

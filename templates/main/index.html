@@ -154,12 +154,51 @@
     </div>
     <!-- 删除模态框 [end] -->
 
+    <!-- 上传模态框 [start] -->
+    <div id="upload-file" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">上传文件</h4>
+                </div>
+                <div class="modal-body">
+                    <form name="upload-file" action="{{ url_for('main.upload_file', dir_path=page_dir_path if dir_path is none else dir_path, path=path) }}" method="post">
+                        <div class="file-input">
+                            <div class="text">选择文件</div>
+                            <input type="file" name="file" required autocomplete="off" />
+                        </div>
+                        <div id="upload-file-progress" class="progress hidden">
+                            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div id="upload-info" class="alert alert-info hidden" role="alert">保存文件...完毕后会刷新页面</div>
+                        <div id="upload-warning" class="alert alert-danger hidden" role="alert"></div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg upload-btn">上传</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 上传模态框 [end] -->
+
     <!-- 页面主体 [start] -->
     <div id="file_manage" class="container">
 
         <h1>文件管理</h1>
 
-        <!-- 不用于罗列文件的列表组 [start] -->
+        <!-- 操作按钮组 [start] -->
+        <div id="action-group">
+            {% if dir_path is defined %}
+                <button type="button" class="btn btn-primary upload-file" data-toggle="modal" data-target="#upload-file">上传文件</button>
+            {% endif %}
+        </div>
+        <!-- 操作按钮组 [end] -->
+
+        <!-- 完整路径 [start] -->
         <ul id="full-path" class="list-group">
             <!-- 页面代表的目录的完整路径 [start] -->
             {% if page_dir_path %}
@@ -179,7 +218,7 @@
             {% endif %}
             <!-- 上一级目录链接 [end] -->
         </ul>
-        <!-- 不用于罗列文件的列表组 [end] -->
+        <!-- 完整路径 [end] -->
 
         <!-- 文件列表 [start] -->
         <ul id="file-list" class="list-group">
@@ -224,6 +263,34 @@
             {% endfor %}
         </ul>
         <!-- 文件列表 [end] -->
+
+        <!-- 分页导航 [start] -->
+        {% if page_count is defined and page_count > 1 %}
+            <nav id="page-nav" aria-label="Page navigation" data-page="{{ page }}" data-page-count="{{ page_count }}"
+                 data-base-url="{{ url_for('main.visit_visible_dir', dir_path=page_dir_path if dir_path is none else dir_path, path=path) }}">
+                <ul class="pagination">
+                    <li>
+                        <a href="javascript:;" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="first"><a href="javascript:;">1</a></li>
+                    <li class="last"><a href="javascript:;">{{ page_count }}</a></li>
+                    <li>
+                        <a href="javascript:;" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="jump-page-group">
+                    <label for="jump-page">跳转到：</label>
+                    <input type="number" id="jump-page" min="1" max="{{ page_count }}" value="{{ page }}" />
+                    <span>&nbsp;页</span>
+                    <button type="button" class="btn btn-primary btn-sm jump-page-btn">跳转</button>
+                </div>
+            </nav>
+        {% endif %}
+        <!-- 分页导航 [end] -->
     </div>
     <!-- 页面主体 [end] -->
 {% endblock %}

@@ -27,6 +27,8 @@ class Config(object):
     PORT: int = 2333
     SECRET_KEY: bytes = urandom(16)
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
+    MAX_CONTENT_LENGTH = 3 * 1024 * 1024 * 1024  # 限制传输单词请求传输数据大小为3GB
+    MAX_FILE_COUNT = 20  # 一页最多显示的文件数目
 
     @staticmethod
     def init_app(app: Flask) -> None:

@@ -5,8 +5,8 @@ from flask import Blueprint, render_template, abort, request, send_from_director
 from flask_login import current_user
 from models import Directory
 from utils import FileItem, sort_file_item
-from config import db
-from decorators import anonymous_forbidden
+from config import db, Config
+from utils import anonymous_forbidden, ceil
 
 main: Blueprint = Blueprint('main', __name__)
 
@@ -97,13 +97,24 @@ def visit_visible_dir(dir_path: str):
         file_item_list.append(file_item)
     sort_file_item(file_item_list)
 
+    # 计算分页的当前页和总页数
+    page_count: int = ceil(len(file_item_list) / Config.MAX_FILE_COUNT)
+    page: int = request.args.get('page', 1, type=int)
+    if page <= 0 or page > page_count:
+        abort(404)
+    start_index: int = (page - 1) * Config.MAX_FILE_COUNT
+    end_index: int = page * Config.MAX_FILE_COUNT
+
     # 响应
     return render_template(
         'main/index.html',
-        file_item_list=file_item_list,
+        file_item_list=file_item_list[start_index:end_index],
         dir_path=None if path == '' else dir_path,
         prev_dir_path=os.path.split(path)[0],
-        page_dir_path=page_dir_path
+        path=path,
+        page_dir_path=page_dir_path,
+        page=page,
+        page_count=page_count
     )
 
 
@@ -250,4 +261,22 @@ def remove_file(dir_path: str):
     except Exception:
         return {'status': 0, 'message': '删除失败'}
 
+    return {'status': 1}
+
+
+@main.route('/upload/<dir_path>', methods=['POST'])
+def upload_file(dir_path: str):
+    # 检查请求参数
+    result: tuple = check_path(dir_path)
+    page_dir_path: str = result[0]
+
+    # 检查文件
+    file = request.files['file']
+    file_save_path: str = os.path.abspath(os.path.join(page_dir_path, file.filename))
+    if os.path.exists(file_save_path):
+        return {'status': 0, 'message': '在同一目录下有同名文件！'}
+    try:
+        file.save(file_save_path)
+    except Exception:
+        return {'status': 0, 'message': '上传失败'}
     return {'status': 1}

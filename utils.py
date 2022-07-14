@@ -1,10 +1,21 @@
 import os.path
 import filetype
 import mimetypes
+from functools import wraps
+from flask import abort
+from flask_login import current_user
 from models import Directory
 
 
 class FileItem(object):
+
+    extension_type_map = {
+        'package': ['rar', 'zip', '7z', 'gz', 'tar'],
+        'video': ['mp4', 'm4v', 'mkv', 'webm', 'mov', 'avi', 'wmv', 'mpg', 'flv', 'mpeg', 'rm', 'ram', 'rmvb'],
+        'image': ['jpg', 'png', 'jpeg', 'gif', 'webp', 'ico', 'bmp', 'psd', 'dwg', 'xcf', 'jpx', 'apng', 'cr2', 'tif', 'jxr', 'heic'],
+        'audio': ['mp3', 'wav', 'm4a', 'flac', 'aac', 'ogg', 'mid', 'amr', 'aiff'],
+        'text': ['txt', 'py', 'js', 'ipynb', 'ini', 'css', 'scss', 'sass', 'html', 'xml', 'json', 'java', 'c', 'cpp', 'md']
+    }
 
     def __init__(self, visible_dir_path: str, path: str, file_name: str):
         self.visible_dir_path: str = visible_dir_path
@@ -35,24 +46,10 @@ class FileItem(object):
 
     @staticmethod
     def get_file_type(file_path: str) -> str:
-        # 根据文件扩展名识别压缩包
         extension: str = os.path.basename(file_path).split('.')[-1]
-        if extension in ['7z', 'gz', 'zip', 'rar', 'tar']:
-            return 'package'
-
-        # 获取mimetype
-        kind = filetype.guess(file_path)
-        if kind is not None:
-            mime_type = kind.mime.split('/')[0]
-        else:
-            kind = mimetypes.guess_type(file_path)[0]
-            if kind is None:
-                return 'other'
-            mime_type = kind.split('/')[0]
-
-        # 返回类型
-        if mime_type in ['text', 'image', 'audio', 'video']:
-            return mime_type
+        for file_type, extension_list in FileItem.extension_type_map.items():
+            if extension in extension_list:
+                return file_type
         return 'other'
 
     @staticmethod
@@ -95,3 +92,19 @@ def sort_file_item(file_item_list: list) -> None:
             file_item_2 = file_item_list[j + 1]
             if weight_map[file_item_1.file_type] < weight_map[file_item_2.file_type]:
                 file_item_list[j], file_item_list[j + 1] = file_item_list[j + 1], file_item_list[j]
+
+
+def anonymous_forbidden(f):
+    @wraps(f)
+    def func(*args, **kwargs):
+        if not current_user.is_authenticated:
+            abort(403)
+        return f(*args, **kwargs)
+    return func
+
+
+def ceil(number: float) -> int:
+    int_number: int = int(number)
+    if number > int_number:
+        return int_number + 1
+    return int_number

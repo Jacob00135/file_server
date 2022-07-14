@@ -102,6 +102,65 @@
   margin-bottom: 10px;
 }
 
+#upload-file .file-input {
+  position: relative;
+  height: 45px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  background-color: #dcd7ff;
+  transition: all 0.3s;
+}
+#upload-file .file-input:hover {
+  background-color: #A59CE1;
+  color: #fff;
+}
+#upload-file .file-input .text {
+  white-space: nowrap;
+  /* 强制文本一行内显示，默认是normal自动换行 */
+  overflow: hidden;
+  /* 隐藏溢出部分 */
+  text-overflow: ellipsis;
+  /* 用省略号替代超出的部分 */
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 10px;
+  line-height: 45px;
+  text-align: center;
+}
+#upload-file .file-input input[type=file] {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding-left: 100%;
+  cursor: pointer;
+}
+#upload-file #upload-warning,
+#upload-file #upload-info {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+#upload-file .upload-btn {
+  height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+#action-group {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
 #full-path {
   margin-bottom: -1px;
 }
@@ -182,6 +241,32 @@
 #file-list .action .dropdown-menu > li > button:active {
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+
+#page-nav {
+  text-align: center;
+}
+#page-nav .ellipsis > a {
+  font-weight: 700;
+  cursor: default;
+}
+#page-nav .jump-page-group label {
+  cursor: pointer;
+}
+#page-nav .jump-page-group #jump-page {
+  width: 80px;
+  padding: 4px 5px 4px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+#page-nav .jump-page-group #jump-page:focus {
+  border-color: #66AFE9;
+}
+#page-nav .jump-page-group .jump-page-btn {
+  margin-bottom: 1px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 /*# sourceMappingURL=index.css.map */

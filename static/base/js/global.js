@@ -36,6 +36,40 @@ function ajaxSubmitForm(formName, formCheck, callback) {
     });
 }
 
+function ajaxUploadFile(formName, formCheck, uploadCallback, responseCallback) {
+    // AJAX代替form标签上传文件
+
+    // 检查元素是否是表单
+    const form = document.querySelector('form[name="' + formName + '"]');
+    if (form === null || form.nodeName !== 'FORM') return undefined;
+
+    // 监听表单提交事件
+    const submitBtn = form.querySelector('button[type="submit"]');
+    form.allowSubmit = true;
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // 防止提交太快
+        if (!form.allowSubmit) return undefined;
+        submitBtn.setAttribute('disabled', '');
+        form.allowSubmit = false;
+
+        // 表单验证
+        if (formCheck !== undefined && !formCheck(form)) {
+            submitBtn.removeAttribute('disabled');
+            form.allowSubmit = true;
+            return undefined;
+        }
+
+        // 上传文件
+        ajax.uploadFile(form.action, new FormData(form), uploadCallback, function (data) {
+            responseCallback(data);
+            submitBtn.removeAttribute('disabled');
+            form.allowSubmit = true;
+        });
+    });
+}
+
 window.ajax = {
     'get': function (url, callback) {
         const xhr = new XMLHttpRequest();
@@ -65,6 +99,24 @@ window.ajax = {
         xhr.addEventListener('readystatechange', function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 callback(xhr.response);
+            }
+        });
+    },
+    'uploadFile': function (url, formData, uploadCallback, responseCallback) {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', function (e) {
+            if (e.lengthComputable) {
+                const value = Math.ceil((e.loaded / e.total) * 100);
+                uploadCallback(value);
+            }
+        });
+
+        xhr.open('post', url, true);
+        xhr.send(formData);
+        xhr.addEventListener('readystatechange', function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                responseCallback(JSON.parse(xhr.responseText));
             }
         });
     }
@@ -123,3 +175,17 @@ function recursionDownloadFile(fileInfo, zipName, jsZipObject) {
         }
     });
 }
+
+function addSearchParam(url, param) {
+    if (url.indexOf('?') < 0) {
+        url = url + '?';
+    } else {
+        url = url + '&';
+    }
+    let ls = [];
+    Object.keys(param).forEach((k) => {
+        ls.push([k, '=', param[k]].join(''));
+    });
+    return url + ls.join('&');
+}
+
