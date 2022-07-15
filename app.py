@@ -1,6 +1,7 @@
 from flask import Flask
 from config import create_app, db
-from models import Customer
+from models import Customer, Directory
+from utils import FileItem
 
 app: Flask = create_app('development')
 # app = create_app('production')
@@ -10,7 +11,9 @@ app: Flask = create_app('development')
 def make_shell_context():
     return {
         'db': db,
-        'Customer': Customer
+        'Customer': Customer,
+        'Directory': Directory,
+        'FileItem': FileItem
     }
 
 

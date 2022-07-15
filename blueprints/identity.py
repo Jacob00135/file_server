@@ -2,22 +2,13 @@ import os.path
 import json
 import re
 from json.decoder import JSONDecodeError
-from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import current_user, login_user, logout_user
 from config import db
 from models import Customer, Directory
+from utils import anonymous_forbidden
 
 identity: Blueprint = Blueprint('identity', __name__)
-
-
-def anonymous_forbidden(f):
-    @wraps(f)
-    def func(*args, **kwargs):
-        if not current_user.is_authenticated:
-            abort(403)
-        return f(*args, **kwargs)
-    return func
 
 
 @identity.route('/login', methods=['GET', 'POST'])
@@ -106,5 +97,24 @@ def update_password():
         return {'status': 0, 'message': '新密码不能与旧密码相同！'}
     current_user.password = password
     db.session.add(current_user)
+    db.session.commit()
+    return {'status': 1}
+
+
+@identity.route('/update_access', methods=['POST'])
+@anonymous_forbidden
+def update_access():
+    update_item: str = request.form.get('update_item', '', type=str)
+    try:
+        update_item: list = json.loads(update_item)
+    except JSONDecodeError:
+        return {'status': 0, 'message': '请求数据不合法！'}
+    for item in update_item:
+        dir_path: str = item.get('dir_path', '')
+        access: int = item.get('access', 0)
+        dir_object = Directory.query.filter_by(dir_path=dir_path).first()
+        if dir_object is not None and access in [1, 2, 4]:
+            dir_object.access = access
+            db.session.add(dir_object)
     db.session.commit()
     return {'status': 1}

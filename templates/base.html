@@ -16,7 +16,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='base/css/base.css') }}" />
 </head>
 <body>
-    <!-- 修改密码模态框 -->
+    {% if current_user.is_authenticated %}
+    <!-- 修改密码模态框 [strart] -->
     <div class="modal fade" id="update-password-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -45,6 +46,8 @@
             </div>
         </div>
     </div>
+    <!-- 修改密码模态框 [end] -->
+    {% endif %}
 
     <!-- 导航栏 [start] -->
     <nav id="nav" class="navbar navbar-default navbar-fixed-top">
@@ -90,6 +93,10 @@
     <!-- Bootstrap JavaScript -->
     <script src="{{ url_for('static', filename='bootstrap/js/jquery.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
+
+    <!-- JavaScript Plugin -->
+    <script type="text/javascript" src="{{ url_for('static', filename='base/js/jszip.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='base/js/FileSaver.js') }}"></script>
 
     <!-- project global JavaScript -->
     <script src="{{ url_for('static', filename='base/js/global.js') }}" type="text/javascript"></script>

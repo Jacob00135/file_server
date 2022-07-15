@@ -1,3 +1,5 @@
+@import "_variable.scss";
+
 @mixin gray-bgc {
     // 灰色背景
     color: #555;
@@ -9,9 +11,10 @@
     display: block;
     width: 100%;
     border-width: 0;
+    border-radius: 0;
     background-color: transparent;
-    padding: 5px 15px 5px 25px;
-    color: #777;
+    padding: 3px 20px;
+    color: #333;
     line-height: 20px;
     text-align: left;
 
@@ -23,6 +26,11 @@
     &:active {
         box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
         -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    @media (max-width: $sm - 1) {
+        padding-left: 25px;
+        color: #777;
     }
 }
 
@@ -76,6 +84,56 @@
     }
 }
 
-@mixin disabled-button {
-    // 被禁用的按钮的样式
+@mixin like-dropdown-a-button {
+    // 将下拉菜单中的按钮设为与链接一样的样式
+    display: block;
+    width: 100%;
+    border-width: 0;
+    background-color: transparent;
+    padding: 3px 20px;
+    color: #333;
+    text-align: left;
+
+    &:hover {
+        color: #262626;
+        background-color: #F5F5F5;
+    }
+
+    &:active {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+@mixin right-action-dropdown {
+    // 40px高的列表组中，列表条目右侧的三点操作按钮
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 40px;
+
+    & > button {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border-width: 0;
+        border-radius: 0;
+
+        .glyphicon {
+            position: absolute;
+            top: 13px;
+            left: 3px;
+        }
+    }
+
+    .dropdown-menu {
+        left: auto;
+        right: 0;
+
+        & > li > button {
+            @include like-dropdown-a-button();
+        }
+    }
 }
