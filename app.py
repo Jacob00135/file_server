@@ -4,7 +4,7 @@ from models import Customer, Directory
 from utils import FileItem
 
 app: Flask = create_app('development')
-# app = create_app('production')
+# app: Flask = create_app('production')
 
 
 @app.shell_context_processor
