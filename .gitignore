@@ -4,4 +4,5 @@ __pycache__/*
 venv/*
 tests/*
 database_sqlite/*
+requirements.txt
 开发文档.md
